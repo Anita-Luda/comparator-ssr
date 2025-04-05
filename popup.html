@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparator SSR</title>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+    <h1>Comparator SSR</h1>
+    <button id="extract">Compare</button>
+
+    <div class="options">
+        <button id="copyDevtools">Copy DevTools Code</button>
+        <button id="copySource">Copy Source Code</button>
+    </div>
+
+    <div id="comparisonResult" style="display: none;">
+<h2>Result</h2>
+        <div id="comparisonOutput" style="white-space: pre-wrap;"></div>
+        <div class="code-container">
+            <div class="code-section">
+                <h2>DevTools Code</h2>
+                <pre id="devtoolsCode"></pre>
+            </div>
+            <div class="code-section">
+                <h2>Source Code</h2>
+                <pre id="sourceCode"></pre>
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

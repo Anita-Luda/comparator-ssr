@@ -1,0 +1,77 @@
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    width: 800px; /* Zwiększ szerokość */
+}
+
+h1 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.code-container {
+    display: flex; /* Umożliwia wyświetlanie obok siebie */
+}
+
+.code-section {
+    width: 50%; /* Każda sekcja zajmuje połowę kontenera */
+    margin-right: 10px;
+}
+
+pre {
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #f9f9f9;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    counter-reset: line; /* Inicjalizuje licznik linii */
+}
+
+pre::before {
+    content: counter(line); /* Wyświetla numer linii */
+    counter-increment: line; /* Zwiększa licznik linii */
+    margin-right: 10px;
+    display: inline-block;
+    width: 30px; /* Szerokość numeru linii */
+}
+
+.options {
+    margin-top: 20px;
+}
+
+button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+/* Style for the comparison output */
+#comparisonOutput {
+    max-width: 100%; /* Maksymalna szerokość elementu */
+    font-size: 10px; /* Mniejszy rozmiar czcionki */
+    line-height: 1.2; /* Mniejsze odstępy między wierszami */
+    overflow-wrap: anywhere; /* Umożliwia łamanie długich słów */
+    display: table; /* Display as a table */
+    width: 100%; /* Full width */
+}
+
+#comparisonOutput div {
+    display: table-cell; /* Make children behave as table cells */
+    padding: 0px; /* Reduced padding for cells */
+    border: 1px solid #ccc; /* Border for clarity */
+    vertical-align: top; /* Align content to the top */
+}
+
+#comparisonOutput div:first-child {
+    width: 50%; /* Set equal width for the first column */
+}
+
+#comparisonOutput div:last-child {
+    width: 50%; /* Set equal width for the second column */
+}
+
+.hidden-element {
+    color: gray; /* Wyszarzenie ukrytych elementów */
+}
