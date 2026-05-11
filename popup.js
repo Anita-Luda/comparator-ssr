@@ -4,9 +4,63 @@ document.addEventListener('DOMContentLoaded', function () {
     const copySourceBtn = document.getElementById('copySource');
     const loadingDiv = document.getElementById('loading');
     const resultDiv = document.getElementById('comparisonResult');
+    const langEnBtn = document.getElementById('lang-en');
+    const langPlBtn = document.getElementById('lang-pl');
+
+    let currentLang = 'en';
+
+    const translations = {
+        en: {
+            subtitle: "Compare DOM (Browser) with HTML (Server)",
+            compareBtn: "Compare Now",
+            copyDevtools: "Copy DevTools",
+            copySource: "Copy Source",
+            loading: "Fetching and analyzing data... (may take up to 5s)",
+            comparisonTitle: "Comparison Result (Cleaned SEO Elements)",
+            legendMismatch: "Difference",
+            legendMatch: "Match",
+            summaryDevtools: "Full DevTools Code (DOM)",
+            summarySource: "Full Source Code (Server)",
+            copied: "Copied!",
+            error: "An error occurred while fetching data. Make sure you are on an active webpage."
+        },
+        pl: {
+            subtitle: "Porównaj DOM (Browser) z HTML (Server)",
+            compareBtn: "Porównaj teraz",
+            copyDevtools: "Kopiuj DevTools",
+            copySource: "Kopiuj Source",
+            loading: "Pobieranie i analizowanie danych... (może to zająć do 5s)",
+            comparisonTitle: "Wynik porównania (Oczyszczone elementy SEO)",
+            legendMismatch: "Różnica",
+            legendMatch: "Zgodność",
+            summaryDevtools: "Pełny kod DevTools (DOM)",
+            summarySource: "Pełny kod Source (Server)",
+            copied: "Skopiowano!",
+            error: "Wystąpił błąd podczas pobierania danych. Upewnij się, że jesteś na aktywnej stronie internetowej."
+        }
+    };
+
+    function updateLanguage(lang) {
+        currentLang = lang;
+        langEnBtn.classList.toggle('active', lang === 'en');
+        langPlBtn.classList.toggle('active', lang === 'pl');
+
+        document.getElementById('subtitle').textContent = translations[lang].subtitle;
+        extractBtn.textContent = translations[lang].compareBtn;
+        copyDevtoolsBtn.textContent = translations[lang].copyDevtools;
+        copySourceBtn.textContent = translations[lang].copySource;
+        document.getElementById('loading-text').textContent = translations[lang].loading;
+        document.getElementById('title-comparison').textContent = translations[lang].comparisonTitle;
+        document.getElementById('legend-mismatch').textContent = translations[lang].legendMismatch;
+        document.getElementById('legend-match').textContent = translations[lang].legendMatch;
+        document.getElementById('summary-devtools').textContent = translations[lang].summaryDevtools;
+        document.getElementById('summary-source').textContent = translations[lang].summarySource;
+    }
+
+    langEnBtn.addEventListener('click', () => updateLanguage('en'));
+    langPlBtn.addEventListener('click', () => updateLanguage('pl'));
 
     extractBtn.addEventListener('click', async () => {
-        // Reset UI
         resultDiv.style.display = 'none';
         loadingDiv.style.display = 'block';
         extractBtn.disabled = true;
@@ -14,35 +68,31 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-            // Wait for potential dynamic content (SEO tools often do this)
             await new Promise(resolve => setTimeout(resolve, 3000));
 
-            // Get the HTML from DevTools
             const results = await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
-                function: extractSEOElements,
+                function: getPageData,
             });
 
-            const devtoolsHTML = results[0].result;
+            const { fullHTML: devtoolsHTML, seoElements: devtoolsSEO } = results[0].result;
             document.getElementById('devtoolsCode').textContent = devtoolsHTML;
 
-            // Get the source code
             const response = await fetch(tab.url);
-            const sourceCode = await response.text();
-            const seoElementsFromSource = extractSEOElementsFromHTML(sourceCode);
-            document.getElementById('sourceCode').textContent = seoElementsFromSource;
+            const sourceFullHTML = await response.text();
+            document.getElementById('sourceCode').textContent = sourceFullHTML;
 
-            // Compare and display
-            compareSEOElements(devtoolsHTML, seoElementsFromSource);
+            const sourceSEO = extractSEOElementsFromHTML(sourceFullHTML);
 
-            // Show results
+            compareSEOElements(devtoolsSEO, sourceSEO);
+
             loadingDiv.style.display = 'none';
             resultDiv.style.display = 'block';
             copyDevtoolsBtn.disabled = false;
             copySourceBtn.disabled = false;
         } catch (error) {
             console.error('Extraction failed:', error);
-            alert('Wystąpił błąd podczas pobierania danych. Upewnij się, że jesteś na aktywnej stronie internetowej.');
+            alert(translations[currentLang].error);
             loadingDiv.style.display = 'none';
         } finally {
             extractBtn.disabled = false;
@@ -51,111 +101,210 @@ document.addEventListener('DOMContentLoaded', function () {
 
     copyDevtoolsBtn.addEventListener('click', () => copyToClipboard('devtoolsCode'));
     copySourceBtn.addEventListener('click', () => copyToClipboard('sourceCode'));
+
+    function copyToClipboard(elementId) {
+        const text = document.getElementById(elementId).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.querySelector(`button[id^="copy${elementId.replace('Code', '')}"]`);
+            const originalText = translations[currentLang][`copy${elementId.replace('Code', '')}`];
+            btn.textContent = translations[currentLang].copied;
+            setTimeout(() => btn.textContent = originalText, 2000);
+        });
+    }
 });
 
-// Shared SEO extraction logic (as string to be used in both contexts)
-const SEO_SELECTORS = {
-    semantic: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button']
-};
+function getPageData() {
+    const fullHTML = document.documentElement.outerHTML;
 
-function extractSEOElements() {
-    const elements = [];
-    const htmlTag = document.documentElement;
-    if (htmlTag) {
-        elements.push(`<html lang="${htmlTag.lang || ''}">`);
+    function cleanNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent.trim();
+            return text ? text : null;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            return null;
+        }
+
+        const tag = node.tagName.toLowerCase();
+
+        // Tags to bypass but keep children (wrappers)
+        const bypassTags = ['div', 'span', 'section', 'article', 'header', 'footer', 'main', 'aside', 'nav', 'ul', 'ol', 'li', 'details', 'summary'];
+
+        const seoTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'title', 'meta', 'link', 'script'];
+
+        if (bypassTags.includes(tag)) {
+            const children = Array.from(node.childNodes)
+                .map(cleanNode)
+                .filter(n => n !== null);
+            return children.length > 0 ? children.join('\n') : null;
+        }
+
+        if (!seoTags.includes(tag)) {
+            return null;
+        }
+
+        if (tag === 'meta') {
+            const name = node.getAttribute('name') || node.getAttribute('property') || node.getAttribute('http-equiv');
+            const content = node.getAttribute('content');
+            if (name && content) {
+                return `<meta ${name}="${content}">`;
+            }
+            return null;
+        }
+        if (tag === 'link') {
+            const rel = node.getAttribute('rel');
+            const href = node.getAttribute('href');
+            const hreflang = node.getAttribute('hreflang');
+            if (rel === 'canonical' || (rel === 'alternate' && hreflang)) {
+                return `<link rel="${rel}" ${hreflang ? `hreflang="${hreflang}" ` : ''}href="${href}">`;
+            }
+            return null;
+        }
+        if (tag === 'script') {
+            if (node.getAttribute('type') === 'application/ld+json') {
+                try {
+                    // Try to prettify JSON-LD if possible
+                    const json = JSON.parse(node.textContent);
+                    return `<script type="application/ld+json">${JSON.stringify(json)}</script>`;
+                } catch (e) {
+                    return `<script type="application/ld+json">${node.textContent.trim()}</script>`;
+                }
+            }
+            return null;
+        }
+        if (tag === 'title') {
+            return `<title>${node.textContent.trim()}</title>`;
+        }
+
+        const alt = node.getAttribute('alt');
+        const content = node.textContent.trim();
+
+        if (tag === 'img') {
+            return `<img alt="${alt || ''}">`;
+        }
+
+        // For other semantic tags, we strip all attributes except maybe 'alt' (though mostly for img)
+        // User said: "z pominięciem klas i innych atrybutów (z wyjątkiem alt, które powinny być pokazywane w porównaniu)"
+        return `<${tag}${alt ? ` alt="${alt}"` : ''}>${content}</${tag}>`;
     }
 
-    const headElements = [
-        'title',
-        'meta[name="description"]',
-        'link[rel="canonical"]',
-        'meta[http-equiv="content-language"]',
-        'link[rel="alternate"][hreflang]',
-        'script[type="application/ld+json"]',
-        'meta[property^="og:"]',
-        'meta[name^="twitter:"]'
-    ];
+    const elements = [];
+    const htmlTag = document.documentElement;
+    if (htmlTag && htmlTag.lang) {
+        elements.push(`<html lang="${htmlTag.lang}">`);
+    }
 
-    headElements.forEach(selector => {
-        const found = document.querySelectorAll(selector);
-        found.forEach(el => elements.push(el.outerHTML));
-    });
-
-    const semanticTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button'];
-    semanticTags.forEach(tag => {
-        const nodes = document.querySelectorAll(tag);
-        nodes.forEach(node => {
-            if (tag === 'a') {
-                // For links, we might want to see if they contain semantic elements
-                const hasSemanticChildren = [...node.children].some(child => semanticTags.includes(child.tagName.toLowerCase()));
-                if (hasSemanticChildren) {
-                    [...node.children].forEach(child => {
-                        if (semanticTags.includes(child.tagName.toLowerCase())) {
-                            elements.push(`<${child.tagName.toLowerCase()}>${child.innerText || child.alt || ''}</${child.tagName.toLowerCase()}>`);
-                        }
-                    });
-                } else {
-                    elements.push(`<a>${node.innerText || ''}</a>`);
-                }
-            } else {
-                const content = node.innerText || node.alt || node.src || '';
-                elements.push(`<${tag}>${content.trim()}</${tag}>`);
-            }
+    const head = document.head;
+    if (head) {
+        Array.from(head.childNodes).forEach(node => {
+            const cleaned = cleanNode(node);
+            if (cleaned) elements.push(cleaned);
         });
-    });
+    }
 
-    return elements.join('\n');
+    const body = document.body;
+    if (body) {
+        Array.from(body.childNodes).forEach(node => {
+            const cleaned = cleanNode(node);
+            if (cleaned) elements.push(cleaned);
+        });
+    }
+
+    return {
+        fullHTML: fullHTML,
+        seoElements: elements.join('\n')
+    };
 }
 
 function extractSEOElementsFromHTML(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
-    // We can reuse a similar logic here or ideally the same function if we pass 'doc' as context
-    // For simplicity in this environment, I'll adapt the same logic to use 'doc'
-    const elements = [];
-    const htmlTag = doc.documentElement;
-    if (htmlTag) {
-        elements.push(`<html lang="${htmlTag.lang || ''}">`);
+    function cleanNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent.trim();
+            return text ? text : null;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            return null;
+        }
+
+        const tag = node.tagName.toLowerCase();
+        const bypassTags = ['div', 'span', 'section', 'article', 'header', 'footer', 'main', 'aside', 'nav', 'ul', 'ol', 'li', 'details', 'summary'];
+        const seoTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'title', 'meta', 'link', 'script'];
+
+        if (bypassTags.includes(tag)) {
+            const children = Array.from(node.childNodes)
+                .map(cleanNode)
+                .filter(n => n !== null);
+            return children.length > 0 ? children.join('\n') : null;
+        }
+
+        if (!seoTags.includes(tag)) {
+            return null;
+        }
+
+        if (tag === 'meta') {
+            const name = node.getAttribute('name') || node.getAttribute('property') || node.getAttribute('http-equiv');
+            const content = node.getAttribute('content');
+            if (name && content) {
+                return `<meta ${name}="${content}">`;
+            }
+            return null;
+        }
+        if (tag === 'link') {
+            const rel = node.getAttribute('rel');
+            const href = node.getAttribute('href');
+            const hreflang = node.getAttribute('hreflang');
+            if (rel === 'canonical' || (rel === 'alternate' && hreflang)) {
+                return `<link rel="${rel}" ${hreflang ? `hreflang="${hreflang}" ` : ''}href="${href}">`;
+            }
+            return null;
+        }
+        if (tag === 'script') {
+            if (node.getAttribute('type') === 'application/ld+json') {
+                try {
+                    const json = JSON.parse(node.textContent);
+                    return `<script type="application/ld+json">${JSON.stringify(json)}</script>`;
+                } catch (e) {
+                    return `<script type="application/ld+json">${node.textContent.trim()}</script>`;
+                }
+            }
+            return null;
+        }
+        if (tag === 'title') {
+            return `<title>${node.textContent.trim()}</title>`;
+        }
+
+        const alt = node.getAttribute('alt');
+        const content = node.textContent.trim();
+
+        if (tag === 'img') {
+            return `<img alt="${alt || ''}">`;
+        }
+
+        return `<${tag}${alt ? ` alt="${alt}"` : ''}>${content}</${tag}>`;
     }
 
-    const headElements = [
-        'title',
-        'meta[name="description"]',
-        'link[rel="canonical"]',
-        'meta[http-equiv="content-language"]',
-        'link[rel="alternate"][hreflang]',
-        'script[type="application/ld+json"]',
-        'meta[property^="og:"]',
-        'meta[name^="twitter:"]'
-    ];
+    const elements = [];
+    const htmlTag = doc.documentElement;
+    if (htmlTag && htmlTag.lang) {
+        elements.push(`<html lang="${htmlTag.lang}">`);
+    }
 
-    headElements.forEach(selector => {
-        const found = doc.querySelectorAll(selector);
-        found.forEach(el => elements.push(el.outerHTML));
-    });
-
-    const semanticTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button'];
-    semanticTags.forEach(tag => {
-        const nodes = doc.querySelectorAll(tag);
-        nodes.forEach(node => {
-            if (tag === 'a') {
-                const hasSemanticChildren = [...node.children].some(child => semanticTags.includes(child.tagName.toLowerCase()));
-                if (hasSemanticChildren) {
-                    [...node.children].forEach(child => {
-                        if (semanticTags.includes(child.tagName.toLowerCase())) {
-                            elements.push(`<${child.tagName.toLowerCase()}>${child.innerText || child.alt || ''}</${child.tagName.toLowerCase()}>`);
-                        }
-                    });
-                } else {
-                    elements.push(`<a>${node.innerText || ''}</a>`);
-                }
-            } else {
-                const content = node.innerText || node.alt || node.src || '';
-                elements.push(`<${tag}>${content.trim()}</${tag}>`);
-            }
+    if (doc.head) {
+        Array.from(doc.head.childNodes).forEach(node => {
+            const cleaned = cleanNode(node);
+            if (cleaned) elements.push(cleaned);
         });
-    });
+    }
+
+    if (doc.body) {
+        Array.from(doc.body.childNodes).forEach(node => {
+            const cleaned = cleanNode(node);
+            if (cleaned) elements.push(cleaned);
+        });
+    }
 
     return elements.join('\n');
 }
@@ -196,14 +345,4 @@ function escapeHTML(unsafe) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-}
-
-function copyToClipboard(elementId) {
-    const text = document.getElementById(elementId).textContent;
-    navigator.clipboard.writeText(text).then(() => {
-        const btn = document.querySelector(`button[id^="copy${elementId.replace('Code', '')}"]`);
-        const originalText = btn.textContent;
-        btn.textContent = 'Skopiowano!';
-        setTimeout(() => btn.textContent = originalText, 2000);
-    });
 }

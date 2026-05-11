@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -10,43 +10,53 @@
 
 <body>
     <header>
-        <h1>Comparator SSR</h1>
-        <p class="subtitle">Porównaj DOM (Browser) z HTML (Server)</p>
+        <div class="header-top">
+            <h1>Comparator SSR</h1>
+            <div class="lang-switch">
+                <button id="lang-en" class="lang-btn active">EN</button>
+                <button id="lang-pl" class="lang-btn">PL</button>
+            </div>
+        </div>
+        <p id="subtitle" class="subtitle">Compare DOM (Browser) with HTML (Server)</p>
     </header>
 
     <main>
         <div class="controls">
-            <button id="extract" class="btn-primary">Porównaj teraz</button>
+            <button id="extract" class="btn-primary">Compare Now</button>
             <div class="options">
-                <button id="copyDevtools" class="btn-secondary" disabled>Kopiuj DevTools</button>
-                <button id="copySource" class="btn-secondary" disabled>Kopiuj Source</button>
+                <button id="copyDevtools" class="btn-secondary" disabled>Copy DevTools</button>
+                <button id="copySource" class="btn-secondary" disabled>Copy Source</button>
             </div>
         </div>
 
         <div id="loading" class="spinner-container" style="display: none;">
             <div class="spinner"></div>
-            <p>Pobieranie i analizowanie danych... (może to zająć do 5s)</p>
+            <p id="loading-text">Fetching and analyzing data... (may take up to 5s)</p>
         </div>
 
         <div id="comparisonResult" style="display: none;">
             <section class="result-section">
-                <h2>Wynik porównania</h2>
+                <h2 id="title-comparison">Comparison Result (Cleaned SEO Elements)</h2>
                 <div class="legend">
-                    <span class="legend-item mismatch">Różnica</span>
-                    <span class="legend-item match">Zgodność</span>
+                    <span id="legend-mismatch" class="legend-item mismatch">Difference</span>
+                    <span id="legend-match" class="legend-item match">Match</span>
                 </div>
                 <div id="comparisonOutput"></div>
             </section>
 
             <section class="code-container">
-                <div class="code-section">
-                    <h2>Kod DevTools (DOM)</h2>
-                    <pre id="devtoolsCode"></pre>
-                </div>
-                <div class="code-section">
-                    <h2>Kod Source (Server)</h2>
-                    <pre id="sourceCode"></pre>
-                </div>
+                <details>
+                    <summary id="summary-devtools">Full DevTools Code (DOM)</summary>
+                    <div class="code-section">
+                        <pre id="devtoolsCode"></pre>
+                    </div>
+                </details>
+                <details>
+                    <summary id="summary-source">Full Source Code (Server)</summary>
+                    <div class="code-section">
+                        <pre id="sourceCode"></pre>
+                    </div>
+                </details>
             </section>
         </div>
     </main>
