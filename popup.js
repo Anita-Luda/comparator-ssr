@@ -19,8 +19,9 @@ document.addEventListener('DOMContentLoaded', function () {
             comparisonTitle: "Comparison Result (Cleaned SEO Elements)",
             legendMismatch: "Difference",
             legendMatch: "Match",
-            summaryDevtools: "Full DevTools Code (DOM)",
-            summarySource: "Full Source Code (Server)",
+            titleFullCode: "Full Code Comparison",
+            summaryDevtools: "DevTools Code (DOM)",
+            summarySource: "Source Code (Server)",
             copied: "Copied!",
             error: "An error occurred while fetching data. Make sure you are on an active webpage."
         },
@@ -33,8 +34,9 @@ document.addEventListener('DOMContentLoaded', function () {
             comparisonTitle: "Wynik porównania (Oczyszczone elementy SEO)",
             legendMismatch: "Różnica",
             legendMatch: "Zgodność",
-            summaryDevtools: "Pełny kod DevTools (DOM)",
-            summarySource: "Pełny kod Source (Server)",
+            titleFullCode: "Pełne porównanie kodu",
+            summaryDevtools: "Kod DevTools (DOM)",
+            summarySource: "Kod Source (Server)",
             copied: "Skopiowano!",
             error: "Wystąpił błąd podczas pobierania danych. Upewnij się, że jesteś na aktywnej stronie internetowej."
         }
@@ -53,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('title-comparison').textContent = translations[lang].comparisonTitle;
         document.getElementById('legend-mismatch').textContent = translations[lang].legendMismatch;
         document.getElementById('legend-match').textContent = translations[lang].legendMatch;
+        document.getElementById('title-full-code').textContent = translations[lang].titleFullCode;
         document.getElementById('summary-devtools').textContent = translations[lang].summaryDevtools;
         document.getElementById('summary-source').textContent = translations[lang].summarySource;
     }
@@ -105,8 +108,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function copyToClipboard(elementId) {
         const text = document.getElementById(elementId).textContent;
         navigator.clipboard.writeText(text).then(() => {
-            const btn = document.querySelector(`button[id^="copy${elementId.replace('Code', '')}"]`);
-            const originalText = translations[currentLang][`copy${elementId.replace('Code', '')}`];
+            const type = elementId.replace('Code', ''); // 'devtools' or 'source'
+            const btnId = `copy${type.charAt(0).toUpperCase() + type.slice(1)}`; // 'copyDevtools' or 'copySource'
+            const btn = document.getElementById(btnId);
+            const translationKey = `copy${type.charAt(0).toUpperCase() + type.slice(1)}`;
+
+            const originalText = translations[currentLang][translationKey];
             btn.textContent = translations[currentLang].copied;
             setTimeout(() => btn.textContent = originalText, 2000);
         });
@@ -126,10 +133,7 @@ function getPageData() {
         }
 
         const tag = node.tagName.toLowerCase();
-
-        // Tags to bypass but keep children (wrappers)
         const bypassTags = ['div', 'span', 'section', 'article', 'header', 'footer', 'main', 'aside', 'nav', 'ul', 'ol', 'li', 'details', 'summary'];
-
         const seoTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'title', 'meta', 'link', 'script'];
 
         if (bypassTags.includes(tag)) {
@@ -143,49 +147,37 @@ function getPageData() {
             return null;
         }
 
-        if (tag === 'meta') {
-            const name = node.getAttribute('name') || node.getAttribute('property') || node.getAttribute('http-equiv');
-            const content = node.getAttribute('content');
-            if (name && content) {
-                return `<meta ${name}="${content}">`;
+        // Clone node to manipulate without affecting original
+        const clone = node.cloneNode(true);
+
+        // Remove all attributes except SEO relevant ones
+        const attrs = Array.from(clone.attributes);
+        const allowedAttrs = ['alt', 'href', 'src', 'name', 'property', 'content', 'rel', 'hreflang', 'type', 'http-equiv', 'title'];
+
+        attrs.forEach(attr => {
+            if (!allowedAttrs.includes(attr.name)) {
+                clone.removeAttribute(attr.name);
             }
-            return null;
-        }
+        });
+
+        // Special handling for link/script to filter further if needed
         if (tag === 'link') {
-            const rel = node.getAttribute('rel');
-            const href = node.getAttribute('href');
-            const hreflang = node.getAttribute('hreflang');
-            if (rel === 'canonical' || (rel === 'alternate' && hreflang)) {
-                return `<link rel="${rel}" ${hreflang ? `hreflang="${hreflang}" ` : ''}href="${href}">`;
+            const rel = clone.getAttribute('rel');
+            if (rel !== 'canonical' && rel !== 'alternate') {
+                return null;
             }
-            return null;
         }
         if (tag === 'script') {
-            if (node.getAttribute('type') === 'application/ld+json') {
-                try {
-                    // Try to prettify JSON-LD if possible
-                    const json = JSON.parse(node.textContent);
-                    return `<script type="application/ld+json">${JSON.stringify(json)}</script>`;
-                } catch (e) {
-                    return `<script type="application/ld+json">${node.textContent.trim()}</script>`;
-                }
+            if (clone.getAttribute('type') !== 'application/ld+json') {
+                return null;
             }
-            return null;
         }
-        if (tag === 'title') {
-            return `<title>${node.textContent.trim()}</title>`;
-        }
-
-        const alt = node.getAttribute('alt');
-        const content = node.textContent.trim();
-
-        if (tag === 'img') {
-            return `<img alt="${alt || ''}">`;
+        if (tag === 'meta') {
+             const name = clone.getAttribute('name') || clone.getAttribute('property') || clone.getAttribute('http-equiv');
+             if (!name) return null;
         }
 
-        // For other semantic tags, we strip all attributes except maybe 'alt' (though mostly for img)
-        // User said: "z pominięciem klas i innych atrybutów (z wyjątkiem alt, które powinny być pokazywane w porównaniu)"
-        return `<${tag}${alt ? ` alt="${alt}"` : ''}>${content}</${tag}>`;
+        return clone.outerHTML;
     }
 
     const elements = [];
@@ -244,46 +236,33 @@ function extractSEOElementsFromHTML(html) {
             return null;
         }
 
-        if (tag === 'meta') {
-            const name = node.getAttribute('name') || node.getAttribute('property') || node.getAttribute('http-equiv');
-            const content = node.getAttribute('content');
-            if (name && content) {
-                return `<meta ${name}="${content}">`;
+        const clone = node.cloneNode(true);
+        const attrs = Array.from(clone.attributes);
+        const allowedAttrs = ['alt', 'href', 'src', 'name', 'property', 'content', 'rel', 'hreflang', 'type', 'http-equiv', 'title'];
+
+        attrs.forEach(attr => {
+            if (!allowedAttrs.includes(attr.name)) {
+                clone.removeAttribute(attr.name);
             }
-            return null;
-        }
+        });
+
         if (tag === 'link') {
-            const rel = node.getAttribute('rel');
-            const href = node.getAttribute('href');
-            const hreflang = node.getAttribute('hreflang');
-            if (rel === 'canonical' || (rel === 'alternate' && hreflang)) {
-                return `<link rel="${rel}" ${hreflang ? `hreflang="${hreflang}" ` : ''}href="${href}">`;
+            const rel = clone.getAttribute('rel');
+            if (rel !== 'canonical' && rel !== 'alternate') {
+                return null;
             }
-            return null;
         }
         if (tag === 'script') {
-            if (node.getAttribute('type') === 'application/ld+json') {
-                try {
-                    const json = JSON.parse(node.textContent);
-                    return `<script type="application/ld+json">${JSON.stringify(json)}</script>`;
-                } catch (e) {
-                    return `<script type="application/ld+json">${node.textContent.trim()}</script>`;
-                }
+            if (clone.getAttribute('type') !== 'application/ld+json') {
+                return null;
             }
-            return null;
         }
-        if (tag === 'title') {
-            return `<title>${node.textContent.trim()}</title>`;
-        }
-
-        const alt = node.getAttribute('alt');
-        const content = node.textContent.trim();
-
-        if (tag === 'img') {
-            return `<img alt="${alt || ''}">`;
+        if (tag === 'meta') {
+             const name = clone.getAttribute('name') || clone.getAttribute('property') || clone.getAttribute('http-equiv');
+             if (!name) return null;
         }
 
-        return `<${tag}${alt ? ` alt="${alt}"` : ''}>${content}</${tag}>`;
+        return clone.outerHTML;
     }
 
     const elements = [];
