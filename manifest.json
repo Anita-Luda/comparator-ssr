@@ -1,11 +1,11 @@
 {
     "manifest_version": 3,
-    "name": "Comparator SSR",
-    "version": "1.0",
-    "description": "Extracts SEO-related elements from the current webpage.",
+    "name": "Comparator SSR Pro",
+    "version": "1.1",
+    "description": "Profesjonalne narzędzie do porównywania elementów SEO między DOM a kodem źródłowym serwera.",
     "permissions": ["activeTab", "scripting"],
     "action": {
         "default_popup": "popup.html",
         "default_icon": "icon16.png"
-        }
+    }
 }
