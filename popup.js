@@ -118,7 +118,23 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => btn.textContent = originalText, 2000);
         });
     }
+
+    // Legend filtering
+    document.getElementById('legend-mismatch').addEventListener('click', () => filterResults('mismatch'));
+    document.getElementById('legend-match').addEventListener('click', () => filterResults('match'));
 });
+
+function filterResults(type) {
+    const rows = document.querySelectorAll('#comparisonOutput tr');
+    rows.forEach(row => {
+        const isMismatch = row.querySelector('.mismatch-cell');
+        if (type === 'mismatch') {
+            row.style.display = isMismatch ? '' : 'none';
+        } else if (type === 'match') {
+            row.style.display = !isMismatch ? '' : 'none';
+        }
+    });
+}
 
 function getPageData() {
     const fullHTML = document.documentElement.outerHTML;
@@ -133,8 +149,8 @@ function getPageData() {
         }
 
         const tag = node.tagName.toLowerCase();
-        const bypassTags = ['div', 'span', 'section', 'article', 'header', 'footer', 'main', 'aside', 'nav', 'ul', 'ol', 'li', 'details', 'summary'];
-        const seoTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'title', 'meta', 'link', 'script'];
+        const bypassTags = ['div', 'span', 'section', 'article', 'header', 'footer', 'main', 'aside', 'nav', 'ul', 'ol', 'details', 'summary', 'table', 'thead', 'tbody', 'tr'];
+        const seoTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'title', 'meta', 'link', 'script', 'li', 'td', 'th'];
 
         if (bypassTags.includes(tag)) {
             const children = Array.from(node.childNodes)
@@ -147,10 +163,7 @@ function getPageData() {
             return null;
         }
 
-        // Clone node to manipulate without affecting original
         const clone = node.cloneNode(true);
-
-        // Remove all attributes except SEO relevant ones
         const attrs = Array.from(clone.attributes);
         const allowedAttrs = ['alt', 'href', 'src', 'name', 'property', 'content', 'rel', 'hreflang', 'type', 'http-equiv', 'title'];
 
@@ -160,7 +173,6 @@ function getPageData() {
             }
         });
 
-        // Special handling for link/script to filter further if needed
         if (tag === 'link') {
             const rel = clone.getAttribute('rel');
             if (rel !== 'canonical' && rel !== 'alternate') {
@@ -222,8 +234,8 @@ function extractSEOElementsFromHTML(html) {
         }
 
         const tag = node.tagName.toLowerCase();
-        const bypassTags = ['div', 'span', 'section', 'article', 'header', 'footer', 'main', 'aside', 'nav', 'ul', 'ol', 'li', 'details', 'summary'];
-        const seoTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'title', 'meta', 'link', 'script'];
+        const bypassTags = ['div', 'span', 'section', 'article', 'header', 'footer', 'main', 'aside', 'nav', 'ul', 'ol', 'details', 'summary', 'table', 'thead', 'tbody', 'tr'];
+        const seoTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'title', 'meta', 'link', 'script', 'li', 'td', 'th'];
 
         if (bypassTags.includes(tag)) {
             const children = Array.from(node.childNodes)

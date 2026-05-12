@@ -167,8 +167,19 @@ h2 {
 
 .legend-item {
     font-size: 12px;
-    padding: 2px 8px;
+    padding: 4px 10px;
     border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: filter 0.2s;
+}
+
+.legend-item:hover {
+    filter: brightness(0.9);
+}
+
+.legend-item:active {
+    filter: brightness(0.8);
 }
 
 .legend-item.mismatch {
