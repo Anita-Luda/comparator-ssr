@@ -73,11 +73,37 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
     margin-bottom: 20px;
     background: var(--card-bg);
     padding: 16px;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.view-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--border-color);
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.view-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.view-btn.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 button {
@@ -257,3 +283,42 @@ pre {
     white-space: pre-wrap;
     margin: 0;
 }
+
+.comparison-table-header {
+    display: flex;
+    background: #f1f5f9;
+    font-weight: bold;
+    font-size: 12px;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+}
+
+.comparison-table-header div {
+    flex: 1;
+    padding: 8px;
+    text-align: center;
+}
+
+.checklist-section {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+#checklistOutput table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#checklistOutput th, #checklistOutput td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.status-check { color: var(--success-text); font-weight: bold; }
+.status-missing { color: var(--error-text); font-weight: bold; }

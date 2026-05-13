@@ -6,8 +6,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const resultDiv = document.getElementById('comparisonResult');
     const langEnBtn = document.getElementById('lang-en');
     const langPlBtn = document.getElementById('lang-pl');
+    const viewTechBtn = document.getElementById('view-tech');
+    const viewContentBtn = document.getElementById('view-content');
+    const btnMissing = document.getElementById('btn-missing');
+    const missingResult = document.getElementById('missingResult');
 
     let currentLang = 'en';
+    let currentView = 'tech'; // 'tech' or 'content'
+    let lastResult = null;
 
     const translations = {
         en: {
@@ -23,10 +29,18 @@ document.addEventListener('DOMContentLoaded', function () {
             summaryDevtools: "DevTools Code (DOM)",
             summarySource: "Source Code (Server)",
             copied: "Copied!",
-            error: "An error occurred while fetching data. Make sure you are on an active webpage."
+            error: "An error occurred while fetching data. Make sure you are on an active webpage.",
+            headerSource: "Source (Server)",
+            headerDevTools: "DevTools (Browser)",
+            titleChecklist: "SEO Checklist",
+            btnMissing: "Check Missing",
+            techView: "Technical",
+            contentView: "Content",
+            element: "Element",
+            status: "Status"
         },
         pl: {
-            subtitle: "Porównaj DOM (Browser) z HTML (Server)",
+            subtitle: "Porównaj DOM (Przeglądarka) z HTML (Serwer)",
             compareBtn: "Porównaj teraz",
             copyDevtools: "Kopiuj DevTools",
             copySource: "Kopiuj Source",
@@ -36,9 +50,17 @@ document.addEventListener('DOMContentLoaded', function () {
             legendMatch: "Zgodność",
             titleFullCode: "Pełne porównanie kodu",
             summaryDevtools: "Kod DevTools (DOM)",
-            summarySource: "Kod Source (Server)",
+            summarySource: "Kod Source (Serwer)",
             copied: "Skopiowano!",
-            error: "Wystąpił błąd podczas pobierania danych. Upewnij się, że jesteś na aktywnej stronie internetowej."
+            error: "Wystąpił błąd podczas pobierania danych. Upewnij się, że jesteś na aktywnej stronie internetowej.",
+            headerSource: "Source (Serwer)",
+            headerDevTools: "DevTools (Przeglądarka)",
+            titleChecklist: "Checklista SEO",
+            btnMissing: "Brakujące",
+            techView: "Techniczne",
+            contentView: "Treść",
+            element: "Element",
+            status: "Status"
         }
     };
 
@@ -58,19 +80,45 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('title-full-code').textContent = translations[lang].titleFullCode;
         document.getElementById('summary-devtools').textContent = translations[lang].summaryDevtools;
         document.getElementById('summary-source').textContent = translations[lang].summarySource;
+        document.getElementById('header-source').textContent = translations[lang].headerSource;
+        document.getElementById('header-devtools').textContent = translations[lang].headerDevTools;
+        document.getElementById('title-checklist').textContent = translations[lang].titleChecklist;
+        btnMissing.textContent = translations[lang].btnMissing;
+        viewTechBtn.textContent = translations[lang].techView;
+        viewContentBtn.textContent = translations[lang].contentView;
     }
 
     langEnBtn.addEventListener('click', () => updateLanguage('en'));
     langPlBtn.addEventListener('click', () => updateLanguage('pl'));
 
+    viewTechBtn.addEventListener('click', () => {
+        currentView = 'tech';
+        viewTechBtn.classList.add('active');
+        viewContentBtn.classList.remove('active');
+        if (lastResult) redisplayComparison();
+    });
+
+    viewContentBtn.addEventListener('click', () => {
+        currentView = 'content';
+        viewContentBtn.classList.add('active');
+        viewTechBtn.classList.remove('active');
+        if (lastResult) redisplayComparison();
+    });
+
+    btnMissing.addEventListener('click', () => {
+        if (!lastResult) return;
+        missingResult.style.display = missingResult.style.display === 'none' ? 'block' : 'none';
+        if (missingResult.style.display === 'block') generateChecklist();
+    });
+
     extractBtn.addEventListener('click', async () => {
         resultDiv.style.display = 'none';
+        missingResult.style.display = 'none';
         loadingDiv.style.display = 'block';
         extractBtn.disabled = true;
 
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
             await new Promise(resolve => setTimeout(resolve, 3000));
 
             const results = await chrome.scripting.executeScript({
@@ -78,16 +126,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 function: getPageData,
             });
 
-            const { fullHTML: devtoolsHTML, seoElements: devtoolsSEO } = results[0].result;
+            const { fullHTML: devtoolsHTML, techElements: devtoolsTech, contentElements: devtoolsContent } = results[0].result;
             document.getElementById('devtoolsCode').textContent = devtoolsHTML;
 
             const response = await fetch(tab.url);
             const sourceFullHTML = await response.text();
             document.getElementById('sourceCode').textContent = sourceFullHTML;
 
-            const sourceSEO = extractSEOElementsFromHTML(sourceFullHTML);
+            const sourceData = extractSEODataFromHTML(sourceFullHTML);
 
-            compareSEOElements(devtoolsSEO, sourceSEO);
+            lastResult = {
+                source: sourceData,
+                devtools: { tech: devtoolsTech, content: devtoolsContent }
+            };
+
+            redisplayComparison();
 
             loadingDiv.style.display = 'none';
             resultDiv.style.display = 'block';
@@ -102,14 +155,48 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    function redisplayComparison() {
+        const sourceSEO = currentView === 'tech' ? lastResult.source.tech : lastResult.source.content;
+        const devtoolsSEO = currentView === 'tech' ? lastResult.devtools.tech : lastResult.devtools.content;
+        compareSEOElements(devtoolsSEO, sourceSEO);
+    }
+
+    function generateChecklist() {
+        const sourceAll = [...lastResult.source.tech, ...lastResult.source.content];
+        const devtoolsAll = [...lastResult.devtools.tech, ...lastResult.devtools.content];
+
+        const checks = [
+            { name: 'Title', pattern: /<title/i },
+            { name: 'Description', pattern: /<meta[^>]*name="description"/i },
+            { name: 'Canonical', pattern: /<link[^>]*rel="canonical"/i },
+            { name: 'JSON-LD', pattern: /<script[^>]*type="application\/ld\+json"/i },
+            { name: 'OG:Title', pattern: /<meta[^>]*property="og:title"/i },
+            { name: 'OG:Description', pattern: /<meta[^>]*property="og:description"/i },
+            { name: 'H1 Tag', pattern: /<h1/i }
+        ];
+
+        let html = `<table><tr><th>${translations[currentLang].element}</th><th>${translations[currentLang].headerSource}</th><th>${translations[currentLang].headerDevTools}</th></tr>`;
+        checks.forEach(check => {
+            const inSource = sourceAll.some(line => check.pattern.test(line));
+            const inDevtools = devtoolsAll.some(line => check.pattern.test(line));
+            html += `<tr>
+                <td>${check.name}</td>
+                <td class="${inSource ? 'status-check' : 'status-missing'}">${inSource ? '✓' : '✗'}</td>
+                <td class="${inDevtools ? 'status-check' : 'status-missing'}">${inDevtools ? '✓' : '✗'}</td>
+            </tr>`;
+        });
+        html += '</table>';
+        document.getElementById('checklistOutput').innerHTML = html;
+    }
+
     copyDevtoolsBtn.addEventListener('click', () => copyToClipboard('devtoolsCode'));
     copySourceBtn.addEventListener('click', () => copyToClipboard('sourceCode'));
 
     function copyToClipboard(elementId) {
         const text = document.getElementById(elementId).textContent;
         navigator.clipboard.writeText(text).then(() => {
-            const type = elementId.replace('Code', ''); // 'devtools' or 'source'
-            const btnId = `copy${type.charAt(0).toUpperCase() + type.slice(1)}`; // 'copyDevtools' or 'copySource'
+            const type = elementId.replace('Code', '');
+            const btnId = `copy${type.charAt(0).toUpperCase() + type.slice(1)}`;
             const btn = document.getElementById(btnId);
             const translationKey = `copy${type.charAt(0).toUpperCase() + type.slice(1)}`;
 
@@ -119,7 +206,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Legend filtering
     document.getElementById('legend-mismatch').addEventListener('click', () => filterResults('mismatch'));
     document.getElementById('legend-match').addEventListener('click', () => filterResults('match'));
 });
@@ -139,176 +225,117 @@ function filterResults(type) {
 function getPageData() {
     const fullHTML = document.documentElement.outerHTML;
 
-    function cleanNode(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.textContent.trim();
-            return text ? text : null;
-        }
-        if (node.nodeType !== Node.ELEMENT_NODE) {
-            return null;
-        }
+    function extract() {
+        const tech = [];
+        const content = [];
+        const techTags = ['title', 'meta', 'link', 'script'];
+        const contentTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'li', 'td', 'th'];
 
-        const tag = node.tagName.toLowerCase();
-        const bypassTags = ['div', 'span', 'section', 'article', 'header', 'footer', 'main', 'aside', 'nav', 'ul', 'ol', 'details', 'summary', 'table', 'thead', 'tbody', 'tr'];
-        const seoTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'title', 'meta', 'link', 'script', 'li', 'td', 'th'];
-
-        if (bypassTags.includes(tag)) {
-            const children = Array.from(node.childNodes)
-                .map(cleanNode)
-                .filter(n => n !== null);
-            return children.length > 0 ? children.join('\n') : null;
-        }
-
-        if (!seoTags.includes(tag)) {
-            return null;
-        }
-
-        const clone = node.cloneNode(true);
-        const attrs = Array.from(clone.attributes);
-        const allowedAttrs = ['alt', 'href', 'src', 'name', 'property', 'content', 'rel', 'hreflang', 'type', 'http-equiv', 'title'];
-
-        attrs.forEach(attr => {
-            if (!allowedAttrs.includes(attr.name)) {
-                clone.removeAttribute(attr.name);
+        function walk(n, insideContentTag = false) {
+            if (n.nodeType === Node.TEXT_NODE) {
+                const text = n.textContent.trim();
+                if (text && !insideContentTag) content.push(text);
+                return;
             }
-        });
+            if (n.nodeType !== Node.ELEMENT_NODE) return;
 
-        if (tag === 'link') {
-            const rel = clone.getAttribute('rel');
-            if (rel !== 'canonical' && rel !== 'alternate') {
-                return null;
+            const tag = n.tagName.toLowerCase();
+            let isContent = contentTags.includes(tag);
+
+            if (techTags.includes(tag)) {
+                const clone = n.cloneNode(true);
+                if (tag === 'link') {
+                    const rel = clone.getAttribute('rel');
+                    if (rel === 'canonical' || rel === 'alternate') tech.push(clone.outerHTML);
+                } else if (tag === 'script') {
+                    if (clone.getAttribute('type') === 'application/ld+json') tech.push(clone.outerHTML);
+                } else if (tag === 'meta') {
+                    const name = clone.getAttribute('name') || clone.getAttribute('property') || clone.getAttribute('http-equiv');
+                    if (name) tech.push(clone.outerHTML);
+                } else {
+                    tech.push(clone.outerHTML);
+                }
+            } else if (isContent) {
+                const alt = n.getAttribute('alt');
+                const innerText = n.innerText.trim();
+                let html = `<${tag}${alt ? ` alt="${alt}"` : ''}>${innerText}</${tag}>`;
+                if (tag === 'img') html = `<img alt="${alt || ''}">`;
+                content.push(html);
             }
-        }
-        if (tag === 'script') {
-            if (clone.getAttribute('type') !== 'application/ld+json') {
-                return null;
-            }
-        }
-        if (tag === 'meta') {
-             const name = clone.getAttribute('name') || clone.getAttribute('property') || clone.getAttribute('http-equiv');
-             if (!name) return null;
+
+            Array.from(n.childNodes).forEach(child => walk(child, insideContentTag || isContent));
         }
 
-        return clone.outerHTML;
+        walk(document.documentElement);
+        return { tech, content };
     }
 
-    const elements = [];
-    const htmlTag = document.documentElement;
-    if (htmlTag && htmlTag.lang) {
-        elements.push(`<html lang="${htmlTag.lang}">`);
-    }
-
-    const head = document.head;
-    if (head) {
-        Array.from(head.childNodes).forEach(node => {
-            const cleaned = cleanNode(node);
-            if (cleaned) elements.push(cleaned);
-        });
-    }
-
-    const body = document.body;
-    if (body) {
-        Array.from(body.childNodes).forEach(node => {
-            const cleaned = cleanNode(node);
-            if (cleaned) elements.push(cleaned);
-        });
-    }
+    const { tech, content } = extract();
 
     return {
         fullHTML: fullHTML,
-        seoElements: elements.join('\n')
+        techElements: tech,
+        contentElements: content
     };
 }
 
-function extractSEOElementsFromHTML(html) {
+function extractSEODataFromHTML(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
-    function cleanNode(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.textContent.trim();
-            return text ? text : null;
+    const tech = [];
+    const content = [];
+    const techTags = ['title', 'meta', 'link', 'script'];
+    const contentTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'li', 'td', 'th'];
+
+    function walk(n, insideContentTag = false) {
+        if (n.nodeType === Node.TEXT_NODE) {
+            const text = n.textContent.trim();
+            if (text && !insideContentTag) content.push(text);
+            return;
         }
-        if (node.nodeType !== Node.ELEMENT_NODE) {
-            return null;
-        }
+        if (n.nodeType !== Node.ELEMENT_NODE) return;
 
-        const tag = node.tagName.toLowerCase();
-        const bypassTags = ['div', 'span', 'section', 'article', 'header', 'footer', 'main', 'aside', 'nav', 'ul', 'ol', 'details', 'summary', 'table', 'thead', 'tbody', 'tr'];
-        const seoTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'title', 'meta', 'link', 'script', 'li', 'td', 'th'];
+        const tag = n.tagName.toLowerCase();
+        let isContent = contentTags.includes(tag);
 
-        if (bypassTags.includes(tag)) {
-            const children = Array.from(node.childNodes)
-                .map(cleanNode)
-                .filter(n => n !== null);
-            return children.length > 0 ? children.join('\n') : null;
-        }
-
-        if (!seoTags.includes(tag)) {
-            return null;
-        }
-
-        const clone = node.cloneNode(true);
-        const attrs = Array.from(clone.attributes);
-        const allowedAttrs = ['alt', 'href', 'src', 'name', 'property', 'content', 'rel', 'hreflang', 'type', 'http-equiv', 'title'];
-
-        attrs.forEach(attr => {
-            if (!allowedAttrs.includes(attr.name)) {
-                clone.removeAttribute(attr.name);
+        if (techTags.includes(tag)) {
+            const clone = n.cloneNode(true);
+            if (tag === 'link') {
+                const rel = clone.getAttribute('rel');
+                if (rel === 'canonical' || rel === 'alternate') tech.push(clone.outerHTML);
+            } else if (tag === 'script') {
+                if (clone.getAttribute('type') === 'application/ld+json') tech.push(clone.outerHTML);
+            } else if (tag === 'meta') {
+                const name = clone.getAttribute('name') || clone.getAttribute('property') || clone.getAttribute('http-equiv');
+                if (name) tech.push(clone.outerHTML);
+            } else {
+                tech.push(clone.outerHTML);
             }
-        });
-
-        if (tag === 'link') {
-            const rel = clone.getAttribute('rel');
-            if (rel !== 'canonical' && rel !== 'alternate') {
-                return null;
-            }
-        }
-        if (tag === 'script') {
-            if (clone.getAttribute('type') !== 'application/ld+json') {
-                return null;
-            }
-        }
-        if (tag === 'meta') {
-             const name = clone.getAttribute('name') || clone.getAttribute('property') || clone.getAttribute('http-equiv');
-             if (!name) return null;
+        } else if (isContent) {
+            const alt = n.getAttribute('alt');
+            const innerText = n.innerText.trim();
+            let html = `<${tag}${alt ? ` alt="${alt}"` : ''}>${innerText}</${tag}>`;
+            if (tag === 'img') html = `<img alt="${alt || ''}">`;
+            content.push(html);
         }
 
-        return clone.outerHTML;
+        Array.from(n.childNodes).forEach(child => walk(child, insideContentTag || isContent));
     }
 
-    const elements = [];
-    const htmlTag = doc.documentElement;
-    if (htmlTag && htmlTag.lang) {
-        elements.push(`<html lang="${htmlTag.lang}">`);
-    }
-
-    if (doc.head) {
-        Array.from(doc.head.childNodes).forEach(node => {
-            const cleaned = cleanNode(node);
-            if (cleaned) elements.push(cleaned);
-        });
-    }
-
-    if (doc.body) {
-        Array.from(doc.body.childNodes).forEach(node => {
-            const cleaned = cleanNode(node);
-            if (cleaned) elements.push(cleaned);
-        });
-    }
-
-    return elements.join('\n');
+    walk(doc.documentElement);
+    return { tech, content };
 }
 
 function compareSEOElements(code1, code2) {
-    const lines1 = code1.split('\n').map(l => l.trim()).filter(l => l);
-    const lines2 = code2.split('\n').map(l => l.trim()).filter(l => l);
+    const lines1 = code1.map(l => l.trim()).filter(l => l);
+    const lines2 = code2.map(l => l.trim()).filter(l => l);
 
     const set1 = new Set(lines1);
     const set2 = new Set(lines2);
 
     const allLines = Array.from(new Set([...lines1, ...lines2]));
-    let resultHTML = '<table>';
+    let resultHTML = '<table style="width:100%">';
 
     allLines.forEach(line => {
         const isIn1 = set1.has(line);

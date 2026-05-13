@@ -23,6 +23,11 @@
     <main>
         <div class="controls">
             <button id="extract" class="btn-primary">Compare Now</button>
+            <div class="view-toggle">
+                <button id="view-tech" class="view-btn active">Technical</button>
+                <button id="view-content" class="view-btn">Content</button>
+            </div>
+            <button id="btn-missing" class="btn-secondary">Check Missing</button>
             <div class="options">
                 <button id="copyDevtools" class="btn-secondary" disabled>Copy DevTools</button>
                 <button id="copySource" class="btn-secondary" disabled>Copy Source</button>
@@ -34,12 +39,21 @@
             <p id="loading-text">Fetching and analyzing data... (may take up to 5s)</p>
         </div>
 
+        <div id="missingResult" class="checklist-section" style="display: none;">
+            <h2 id="title-checklist">SEO Checklist</h2>
+            <div id="checklistOutput"></div>
+        </div>
+
         <div id="comparisonResult" style="display: none;">
             <section class="result-section">
                 <h2 id="title-comparison">Comparison Result (Cleaned SEO Elements)</h2>
                 <div class="legend">
                     <span id="legend-mismatch" class="legend-item mismatch">Difference</span>
                     <span id="legend-match" class="legend-item match">Match</span>
+                </div>
+                <div class="comparison-table-header">
+                    <div id="header-source">Source (Server)</div>
+                    <div id="header-devtools">DevTools (Browser)</div>
                 </div>
                 <div id="comparisonOutput"></div>
             </section>
