@@ -37,7 +37,19 @@ document.addEventListener('DOMContentLoaded', function () {
             techView: "Technical",
             contentView: "Content",
             element: "Element",
-            status: "Status"
+            status: "Status",
+            checkTitle: "Title",
+            checkDesc: "Description",
+            checkCanon: "Canonical",
+            checkJsonLd: "JSON-LD",
+            checkOgTitle: "OG:Title",
+            checkOgDesc: "OG:Description",
+            checkH1: "H1 Tag",
+            checkH2: "H2 Tag",
+            checkRobots: "Robots",
+            checkTwitter: "Twitter Card",
+            checkLang: "HTML Lang",
+            checkFavicon: "Favicon"
         },
         pl: {
             subtitle: "Porównaj DOM (Przeglądarka) z HTML (Serwer)",
@@ -60,7 +72,19 @@ document.addEventListener('DOMContentLoaded', function () {
             techView: "Techniczne",
             contentView: "Treść",
             element: "Element",
-            status: "Status"
+            status: "Status",
+            checkTitle: "Tytuł",
+            checkDesc: "Opis",
+            checkCanon: "Link Kanoniczny",
+            checkJsonLd: "JSON-LD",
+            checkOgTitle: "OG:Tytuł",
+            checkOgDesc: "OG:Opis",
+            checkH1: "Tag H1",
+            checkH2: "Tag H2",
+            checkRobots: "Robots",
+            checkTwitter: "Twitter Card",
+            checkLang: "Język HTML",
+            checkFavicon: "Fawikona"
         }
     };
 
@@ -86,6 +110,8 @@ document.addEventListener('DOMContentLoaded', function () {
         btnMissing.textContent = translations[lang].btnMissing;
         viewTechBtn.textContent = translations[lang].techView;
         viewContentBtn.textContent = translations[lang].contentView;
+
+        if (missingResult.style.display === 'block') generateChecklist();
     }
 
     langEnBtn.addEventListener('click', () => updateLanguage('en'));
@@ -164,18 +190,24 @@ document.addEventListener('DOMContentLoaded', function () {
     function generateChecklist() {
         const sourceAll = [...lastResult.source.tech, ...lastResult.source.content];
         const devtoolsAll = [...lastResult.devtools.tech, ...lastResult.devtools.content];
+        const t = translations[currentLang];
 
         const checks = [
-            { name: 'Title', pattern: /<title/i },
-            { name: 'Description', pattern: /<meta[^>]*name="description"/i },
-            { name: 'Canonical', pattern: /<link[^>]*rel="canonical"/i },
-            { name: 'JSON-LD', pattern: /<script[^>]*type="application\/ld\+json"/i },
-            { name: 'OG:Title', pattern: /<meta[^>]*property="og:title"/i },
-            { name: 'OG:Description', pattern: /<meta[^>]*property="og:description"/i },
-            { name: 'H1 Tag', pattern: /<h1/i }
+            { name: t.checkTitle, pattern: /<title/i },
+            { name: t.checkDesc, pattern: /<meta[^>]*name="description"/i },
+            { name: t.checkCanon, pattern: /<link[^>]*rel="canonical"/i },
+            { name: t.checkJsonLd, pattern: /<script[^>]*type="application\/ld\+json"/i },
+            { name: t.checkOgTitle, pattern: /<meta[^>]*property="og:title"/i },
+            { name: t.checkOgDesc, pattern: /<meta[^>]*property="og:description"/i },
+            { name: t.checkH1, pattern: /<h1/i },
+            { name: t.checkH2, pattern: /<h2/i },
+            { name: t.checkRobots, pattern: /<meta[^>]*name="robots"/i },
+            { name: t.checkTwitter, pattern: /<meta[^>]*name="twitter:/i },
+            { name: t.checkLang, pattern: /<html[^>]*lang=/i },
+            { name: t.checkFavicon, pattern: /<link[^>]*rel="icon"|<link[^>]*rel="shortcut icon"/i }
         ];
 
-        let html = `<table><tr><th>${translations[currentLang].element}</th><th>${translations[currentLang].headerSource}</th><th>${translations[currentLang].headerDevTools}</th></tr>`;
+        let html = `<table><tr><th>${t.element}</th><th>${t.headerSource}</th><th>${t.headerDevTools}</th></tr>`;
         checks.forEach(check => {
             const inSource = sourceAll.some(line => check.pattern.test(line));
             const inDevtools = devtoolsAll.some(line => check.pattern.test(line));
@@ -224,6 +256,7 @@ function filterResults(type) {
 
 function getPageData() {
     const fullHTML = document.documentElement.outerHTML;
+    const htmlTag = document.documentElement.cloneNode(false).outerHTML;
 
     function extract() {
         const tech = [];
@@ -246,7 +279,7 @@ function getPageData() {
                 const clone = n.cloneNode(true);
                 if (tag === 'link') {
                     const rel = clone.getAttribute('rel');
-                    if (rel === 'canonical' || rel === 'alternate') tech.push(clone.outerHTML);
+                    if (rel === 'canonical' || rel === 'alternate' || rel === 'icon' || rel === 'shortcut icon') tech.push(clone.outerHTML);
                 } else if (tag === 'script') {
                     if (clone.getAttribute('type') === 'application/ld+json') tech.push(clone.outerHTML);
                 } else if (tag === 'meta') {
@@ -255,12 +288,21 @@ function getPageData() {
                 } else {
                     tech.push(clone.outerHTML);
                 }
+                return; // Don't walk children of tech tags for content
             } else if (isContent) {
                 const alt = n.getAttribute('alt');
-                const innerText = n.innerText.trim();
-                let html = `<${tag}${alt ? ` alt="${alt}"` : ''}>${innerText}</${tag}>`;
-                if (tag === 'img') html = `<img alt="${alt || ''}">`;
-                content.push(html);
+                const href = n.getAttribute('href');
+                const src = n.getAttribute('src');
+                const innerText = n.innerText ? n.innerText.trim() : (n.textContent ? n.textContent.trim() : '');
+
+                let attrs = '';
+                if (alt) attrs += ` alt="${alt}"`;
+                if (href) attrs += ` href="${href}"`;
+                if (src) attrs += ` src="${src}"`;
+
+                let htmlContent = `<${tag}${attrs.trim() ? ' ' + attrs.trim() : ''}>${innerText}</${tag}>`;
+                if (tag === 'img') htmlContent = `<img${attrs.trim() ? ' ' + attrs.trim() : ''}>`;
+                content.push(htmlContent);
             }
 
             Array.from(n.childNodes).forEach(child => walk(child, insideContentTag || isContent));
@@ -271,6 +313,7 @@ function getPageData() {
     }
 
     const { tech, content } = extract();
+    tech.push(htmlTag);
 
     return {
         fullHTML: fullHTML,
@@ -282,6 +325,7 @@ function getPageData() {
 function extractSEODataFromHTML(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
+    const htmlTag = doc.documentElement.cloneNode(false).outerHTML;
 
     const tech = [];
     const content = [];
@@ -303,7 +347,7 @@ function extractSEODataFromHTML(html) {
             const clone = n.cloneNode(true);
             if (tag === 'link') {
                 const rel = clone.getAttribute('rel');
-                if (rel === 'canonical' || rel === 'alternate') tech.push(clone.outerHTML);
+                if (rel === 'canonical' || rel === 'alternate' || rel === 'icon' || rel === 'shortcut icon') tech.push(clone.outerHTML);
             } else if (tag === 'script') {
                 if (clone.getAttribute('type') === 'application/ld+json') tech.push(clone.outerHTML);
             } else if (tag === 'meta') {
@@ -312,18 +356,28 @@ function extractSEODataFromHTML(html) {
             } else {
                 tech.push(clone.outerHTML);
             }
+            return; // Don't walk children of tech tags
         } else if (isContent) {
             const alt = n.getAttribute('alt');
-            const innerText = n.innerText.trim();
-            let html = `<${tag}${alt ? ` alt="${alt}"` : ''}>${innerText}</${tag}>`;
-            if (tag === 'img') html = `<img alt="${alt || ''}">`;
-            content.push(html);
+            const href = n.getAttribute('href');
+            const src = n.getAttribute('src');
+            const innerText = (n.innerText || n.textContent || '').trim();
+
+            let attrs = '';
+            if (alt) attrs += ` alt="${alt}"`;
+            if (href) attrs += ` href="${href}"`;
+            if (src) attrs += ` src="${src}"`;
+
+            let htmlContent = `<${tag}${attrs.trim() ? ' ' + attrs.trim() : ''}>${innerText}</${tag}>`;
+            if (tag === 'img') htmlContent = `<img${attrs.trim() ? ' ' + attrs.trim() : ''}>`;
+            content.push(htmlContent);
         }
 
         Array.from(n.childNodes).forEach(child => walk(child, insideContentTag || isContent));
     }
 
     walk(doc.documentElement);
+    tech.push(htmlTag);
     return { tech, content };
 }
 
