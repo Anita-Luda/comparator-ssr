@@ -63,7 +63,9 @@ document.addEventListener('DOMContentLoaded', function () {
             labelLang: "Language",
             labelAnalysis: "Analysis",
             labelView: "View Filter",
-            labelTools: "Tools"
+            labelTools: "Tools",
+            on: "ON",
+            off: "OFF"
         },
         pl: {
             subtitle: "Analiza i porównanie renderowania SSR vs CSR",
@@ -112,7 +114,9 @@ document.addEventListener('DOMContentLoaded', function () {
             labelLang: "Język",
             labelAnalysis: "Analiza",
             labelView: "Filtr widoku",
-            labelTools: "Narzędzia"
+            labelTools: "Narzędzia",
+            on: "WŁ",
+            off: "WYŁ"
         }
     };
 
@@ -135,7 +139,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('header-source').textContent = translations[lang].headerSource;
         document.getElementById('header-devtools').textContent = translations[lang].headerDevTools;
         document.getElementById('title-checklist').textContent = translations[lang].titleChecklist;
-        btnMissing.textContent = translations[lang].btnMissing;
+        document.getElementById('audit-on').textContent = translations[lang].on;
+        document.getElementById('audit-off').textContent = translations[lang].off;
         viewTechBtn.textContent = translations[lang].techView;
         viewContentBtn.textContent = translations[lang].contentView;
 
@@ -164,11 +169,25 @@ document.addEventListener('DOMContentLoaded', function () {
         if (lastResult) redisplayComparison();
     });
 
-    btnMissing.addEventListener('click', () => {
+    function toggleAudit(state) {
         if (!lastResult) return;
-        missingResult.style.display = missingResult.style.display === 'none' ? 'block' : 'none';
-        if (missingResult.style.display === 'block') generateChecklist();
-    });
+        const btnOn = document.getElementById('audit-on');
+        const btnOff = document.getElementById('audit-off');
+
+        if (state === 'on') {
+            btnOn.classList.add('active');
+            btnOff.classList.remove('active');
+            missingResult.style.display = 'block';
+            generateChecklist();
+        } else {
+            btnOff.classList.add('active');
+            btnOn.classList.remove('active');
+            missingResult.style.display = 'none';
+        }
+    }
+
+    document.getElementById('audit-on').addEventListener('click', () => toggleAudit('on'));
+    document.getElementById('audit-off').addEventListener('click', () => toggleAudit('off'));
 
     extractBtn.addEventListener('click', async () => {
         resultDiv.style.display = 'none';
@@ -363,7 +382,13 @@ function getPageData() {
                     const important = ['canonical', 'alternate', 'icon', 'shortcut icon'];
                     if (important.includes(rel)) tech.push(`<link${attrs}>`);
                 } else if (tag === 'script') {
-                    if (n.getAttribute('type') === 'application/ld+json') tech.push(`<script${attrs}>${(n.innerText || n.textContent).trim()}</script>`);
+                    if (n.getAttribute('type') === 'application/ld+json') {
+                        let jsonText = (n.innerText || n.textContent).trim();
+                        try {
+                            jsonText = JSON.stringify(JSON.parse(jsonText), null, 2);
+                        } catch (e) {}
+                        tech.push(`<script${attrs}>\n${jsonText}\n</script>`);
+                    }
                 } else if (tag === 'meta') {
                     const name = n.getAttribute('name') || n.getAttribute('property') || n.getAttribute('http-equiv') || n.getAttribute('charset');
                     if (name) tech.push(`<meta${attrs}>`);
@@ -453,7 +478,13 @@ function extractSEODataFromHTML(html) {
             const important = ['canonical', 'alternate', 'icon', 'shortcut icon'];
             if (important.includes(rel)) tech.push(`<link${attrs}>`);
             } else if (tag === 'script') {
-            if (n.getAttribute('type') === 'application/ld+json') tech.push(`<script${attrs}>${(n.innerText || n.textContent).trim()}</script>`);
+            if (n.getAttribute('type') === 'application/ld+json') {
+                let jsonText = (n.innerText || n.textContent).trim();
+                try {
+                    jsonText = JSON.stringify(JSON.parse(jsonText), null, 2);
+                } catch (e) {}
+                tech.push(`<script${attrs}>\n${jsonText}\n</script>`);
+            }
             } else if (tag === 'meta') {
             const name = n.getAttribute('name') || n.getAttribute('property') || n.getAttribute('http-equiv') || n.getAttribute('charset');
             if (name) tech.push(`<meta${attrs}>`);
