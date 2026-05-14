@@ -1,77 +1,324 @@
 /* styles.css */
 
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --error-bg: #fee2e2;
+    --error-text: #991b1b;
+    --success-bg: #f0fdf4;
+    --success-text: #166534;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 body {
-    font-family: Arial, sans-serif;
-    padding: 10px;
-    width: 800px; /* Zwiększ szerokość */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 24px;
+    width: 800px;
+}
+
+header {
+    margin-bottom: 32px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.badge {
+    background: #dbeafe;
+    color: var(--primary-color);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 8px;
 }
 
 h1 {
-    font-size: 20px;
-    margin-bottom: 10px;
+    font-size: 26px;
+    margin: 0;
+    color: var(--text-main);
+    font-weight: 800;
 }
 
-.code-container {
-    display: flex; /* Umożliwia wyświetlanie obok siebie */
+.subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 4px 0 0;
 }
 
-.code-section {
-    width: 50%; /* Każda sekcja zajmuje połowę kontenera */
-    margin-right: 10px;
+/* Control Groups and Labels */
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-pre {
-    border: 1px solid #ccc;
-    padding: 10px;
-    background-color: #f9f9f9;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    counter-reset: line; /* Inicjalizuje licznik linii */
+.control-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    font-weight: 700;
 }
 
-pre::before {
-    content: counter(line); /* Wyświetla numer linii */
-    counter-increment: line; /* Zwiększa licznik linii */
-    margin-right: 10px;
-    display: inline-block;
-    width: 30px; /* Szerokość numeru linii */
+/* Action Bar */
+.action-bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 32px;
+    border: 1px solid var(--border-color);
 }
 
-.options {
-    margin-top: 20px;
+/* Segmented Control */
+.segmented-control {
+    display: flex;
+    background-color: #f1f5f9;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.segmented-control button {
+    padding: 6px 14px;
+    font-size: 12px;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.segmented-control button.active {
+    background-color: white;
+    color: var(--primary-color);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.segmented-control button:hover:not(.active) {
+    color: var(--text-main);
+}
+
+/* Buttons */
+.button-group {
+    display: flex;
+    gap: 8px;
 }
 
 button {
-    margin-right: 5px;
-    padding: 5px 10px;
+    font-weight: 600;
     cursor: pointer;
+    transition: all 0.2s;
+    border: none;
 }
 
-/* Style for the comparison output */
-#comparisonOutput {
-    max-width: 100%; /* Maksymalna szerokość elementu */
-    font-size: 10px; /* Mniejszy rozmiar czcionki */
-    line-height: 1.2; /* Mniejsze odstępy między wierszami */
-    overflow-wrap: anywhere; /* Umożliwia łamanie długich słów */
-    display: table; /* Display as a table */
-    width: 100%; /* Full width */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
 
-#comparisonOutput div {
-    display: table-cell; /* Make children behave as table cells */
-    padding: 0px; /* Reduced padding for cells */
-    border: 1px solid #ccc; /* Border for clarity */
-    vertical-align: top; /* Align content to the top */
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
 }
 
-#comparisonOutput div:first-child {
-    width: 50%; /* Set equal width for the first column */
+.btn-secondary {
+    background-color: white;
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
 }
 
-#comparisonOutput div:last-child {
-    width: 50%; /* Set equal width for the second column */
+.btn-secondary:hover:not(:disabled) {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
 }
 
-.hidden-element {
-    color: gray; /* Wyszarzenie ukrytych elementów */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
+
+/* Results Section */
+.result-section, .checklist-section, .full-code-container {
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    border: 1px solid var(--border-color);
+}
+
+h2 {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend {
+    margin-bottom: 16px;
+    display: flex;
+    gap: 12px;
+}
+
+.legend-item {
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.legend-item:hover {
+    filter: brightness(0.95);
+    transform: scale(1.02);
+}
+
+.legend-item.mismatch {
+    background-color: var(--error-bg);
+    color: var(--error-text);
+}
+
+.legend-item.match {
+    background-color: #f1f5f9;
+    color: var(--text-muted);
+}
+
+/* Tables */
+#comparisonOutput table, #checklistOutput table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#comparisonOutput td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    width: 50%;
+    vertical-align: top;
+    word-break: break-all;
+}
+
+.comparison-table-header {
+    display: flex;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 8px 8px 0 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.comparison-table-header div {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+}
+
+.mismatch-cell {
+    background-color: #fff1f2;
+}
+
+/* Checklist Status */
+.status-check { color: var(--success-text); text-align: center; }
+.status-missing { color: var(--error-text); text-align: center; }
+
+#checklistOutput td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 13px;
+}
+
+#checklistOutput th {
+    text-align: left;
+    padding: 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.analysis-row {
+    background-color: #f8fafc;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.analysis-row td:first-child {
+    color: var(--text-muted);
+}
+
+/* Code Blocks */
+pre {
+    background-color: #0f172a;
+    color: #cbd5e1;
+    padding: 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    max-height: 400px;
+    overflow: auto;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.side-by-side {
+    display: flex;
+    gap: 20px;
+}
+
+.code-column {
+    flex: 1;
+    min-width: 0;
+}
+
+.spinner-container {
+    text-align: center;
+    padding: 60px 0;
+}
+
+#loading-text {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

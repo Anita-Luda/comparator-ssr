@@ -1,0 +1,25 @@
+Możliwości dalszego rozwoju narzędzia Comparator SSR PRO:
+
+1. Analiza techniczna i wydajność:
+   - Wykrywanie różnic w czasie ładowania (Time to First Byte vs Full DOM Load).
+   - Analiza wagi przesyłanego HTML vs waga wyrenderowanego DOM (kilobajty).
+   - Wykrywanie zasobów blokujących renderowanie (render-blocking), które są dodawane dynamicznie przez JS.
+   - Wykresy porównawcze Core Web Vitals (LCP, CLS) dla wersji SSR vs CSR.
+
+2. Rozszerzone SEO i Semantyka:
+   - Pełne porównanie treści nagłówków H1-H6 (nie tylko liczba, ale różnice w tekście).
+   - Weryfikacja atrybutów 'rel' w linkach (np. czy JS nie dodaje dynamicznie 'nofollow').
+   - Walidacja poprawności danych strukturalnych JSON-LD (walidator schema.org) zintegrowany w narzędziu.
+   - Sprawdzanie czy linki w menu nawigacyjnym są identyczne w obu wersjach.
+
+3. UX i funkcjonalność:
+   - Eksport raportu do PDF/CSV/JSON.
+   - Historia porównań dla danej domeny z możliwością śledzenia zmian w czasie.
+   - Symulacja różnych User-Agentów (Googlebot smartphone, Bingbot, Social Media Crawlers).
+   - Widok "Side-by-Side" dla oczyszczonego tekstu z podświetlaniem różnic (diff highlight).
+
+4. Automatyzacja i Integracje:
+   - Integracja z Google Search Console API (status indeksowania).
+   - System alertów o krytycznych rozbieżnościach (np. różnica w Title powyżej 20%).
+   - Batch processing - możliwość uruchomienia testu dla listy URLi z sitemapy.
+   - Wtyczka do Slacka/Discorda wysyłająca raport po każdej publikacji wersji produkcyjnej strony.

@@ -1,38 +1,94 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparator SSR</title>
     <link rel="stylesheet" href="styles.css">
-
 </head>
 
 <body>
-    <h1>Comparator SSR</h1>
-    <button id="extract">Compare</button>
-
-    <div class="options">
-        <button id="copyDevtools">Copy DevTools Code</button>
-        <button id="copySource">Copy Source Code</button>
-    </div>
-
-    <div id="comparisonResult" style="display: none;">
-<h2>Result</h2>
-        <div id="comparisonOutput" style="white-space: pre-wrap;"></div>
-        <div class="code-container">
-            <div class="code-section">
-                <h2>DevTools Code</h2>
-                <pre id="devtoolsCode"></pre>
+    <header>
+        <div class="header-top">
+            <div class="title-area">
+                <h1>Comparator SSR <span class="badge">PRO</span></h1>
+                <p id="subtitle" class="subtitle">Compare DOM (Browser) with HTML (Server)</p>
             </div>
-            <div class="code-section">
-                <h2>Source Code</h2>
-                <pre id="sourceCode"></pre>
+            <div class="control-group">
+                <span id="label-lang" class="control-label">Language</span>
+                <div class="segmented-control">
+                    <button id="lang-en" class="active">EN</button>
+                    <button id="lang-pl">PL</button>
+                </div>
             </div>
         </div>
-        
-    </div>
+    </header>
+
+    <main>
+        <div class="action-bar">
+            <div class="control-group">
+                <span id="label-analysis" class="control-label">Analysis</span>
+                <button id="extract" class="btn-primary">Compare Now</button>
+            </div>
+
+            <div class="control-group">
+                <span id="label-view" class="control-label">View Filter</span>
+                <div class="segmented-control">
+                    <button id="view-tech" class="active">Technical</button>
+                    <button id="view-content">Content</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <span id="label-tools" class="control-label">Tools</span>
+                <div class="button-group">
+                    <button id="btn-missing" class="btn-secondary">Check Missing</button>
+                    <button id="copyDevtools" class="btn-secondary" disabled>Copy DevTools</button>
+                    <button id="copySource" class="btn-secondary" disabled>Copy Source</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading" class="spinner-container" style="display: none;">
+            <div class="spinner"></div>
+            <p id="loading-text">Fetching and analyzing data... (may take up to 5s)</p>
+        </div>
+
+        <div id="missingResult" class="checklist-section" style="display: none;">
+            <h2 id="title-checklist">SEO Checklist</h2>
+            <div id="checklistOutput"></div>
+        </div>
+
+        <div id="comparisonResult" style="display: none;">
+            <section class="result-section">
+                <h2 id="title-comparison">Comparison Result (Cleaned SEO Elements)</h2>
+                <div class="legend">
+                    <span id="legend-mismatch" class="legend-item mismatch">Difference</span>
+                    <span id="legend-match" class="legend-item match">Match</span>
+                </div>
+                <div class="comparison-table-header">
+                    <div id="header-source">Source (Server)</div>
+                    <div id="header-devtools">DevTools (Browser)</div>
+                </div>
+                <div id="comparisonOutput"></div>
+            </section>
+
+            <section class="full-code-container">
+                <h2 id="title-full-code">Full Code Comparison</h2>
+                <div class="side-by-side">
+                    <div class="code-column">
+                        <h3 id="summary-devtools">DevTools Code (DOM)</h3>
+                        <pre id="devtoolsCode"></pre>
+                    </div>
+                    <div class="code-column">
+                        <h3 id="summary-source">Source Code (Server)</h3>
+                        <pre id="sourceCode"></pre>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
 
     <script src="popup.js"></script>
 </body>
