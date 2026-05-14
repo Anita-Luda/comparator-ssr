@@ -360,7 +360,7 @@ function getPageData() {
 
                 if (tag === 'link') {
                     const rel = n.getAttribute('rel');
-                    const important = ['canonical', 'alternate', 'icon', 'shortcut icon', 'stylesheet', 'preload', 'dns-prefetch', 'preconnect'];
+                    const important = ['canonical', 'alternate', 'icon', 'shortcut icon'];
                     if (important.includes(rel)) tech.push(`<link${attrs}>`);
                 } else if (tag === 'script') {
                     if (n.getAttribute('type') === 'application/ld+json') tech.push(`<script${attrs}>${(n.innerText || n.textContent).trim()}</script>`);
@@ -450,7 +450,7 @@ function extractSEODataFromHTML(html) {
 
             if (tag === 'link') {
             const rel = n.getAttribute('rel');
-            const important = ['canonical', 'alternate', 'icon', 'shortcut icon', 'stylesheet', 'preload', 'dns-prefetch', 'preconnect'];
+            const important = ['canonical', 'alternate', 'icon', 'shortcut icon'];
             if (important.includes(rel)) tech.push(`<link${attrs}>`);
             } else if (tag === 'script') {
             if (n.getAttribute('type') === 'application/ld+json') tech.push(`<script${attrs}>${(n.innerText || n.textContent).trim()}</script>`);
