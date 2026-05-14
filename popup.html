@@ -11,26 +11,42 @@
 <body>
     <header>
         <div class="header-top">
-            <h1>Comparator SSR</h1>
-            <div class="lang-switch">
-                <button id="lang-en" class="lang-btn active">EN</button>
-                <button id="lang-pl" class="lang-btn">PL</button>
+            <div class="title-area">
+                <h1>Comparator SSR <span class="badge">PRO</span></h1>
+                <p id="subtitle" class="subtitle">Compare DOM (Browser) with HTML (Server)</p>
+            </div>
+            <div class="control-group">
+                <span id="label-lang" class="control-label">Language</span>
+                <div class="segmented-control">
+                    <button id="lang-en" class="active">EN</button>
+                    <button id="lang-pl">PL</button>
+                </div>
             </div>
         </div>
-        <p id="subtitle" class="subtitle">Compare DOM (Browser) with HTML (Server)</p>
     </header>
 
     <main>
-        <div class="controls">
-            <button id="extract" class="btn-primary">Compare Now</button>
-            <div class="view-toggle">
-                <button id="view-tech" class="view-btn active">Technical</button>
-                <button id="view-content" class="view-btn">Content</button>
+        <div class="action-bar">
+            <div class="control-group">
+                <span id="label-analysis" class="control-label">Analysis</span>
+                <button id="extract" class="btn-primary">Compare Now</button>
             </div>
-            <button id="btn-missing" class="btn-secondary">Check Missing</button>
-            <div class="options">
-                <button id="copyDevtools" class="btn-secondary" disabled>Copy DevTools</button>
-                <button id="copySource" class="btn-secondary" disabled>Copy Source</button>
+
+            <div class="control-group">
+                <span id="label-view" class="control-label">View Filter</span>
+                <div class="segmented-control">
+                    <button id="view-tech" class="active">Technical</button>
+                    <button id="view-content">Content</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <span id="label-tools" class="control-label">Tools</span>
+                <div class="button-group">
+                    <button id="btn-missing" class="btn-secondary">Check Missing</button>
+                    <button id="copyDevtools" class="btn-secondary" disabled>Copy DevTools</button>
+                    <button id="copySource" class="btn-secondary" disabled>Copy Source</button>
+                </div>
             </div>
         </div>
 

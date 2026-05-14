@@ -1,27 +1,25 @@
-Możliwości rozwoju narzędzia Comparator SSR:
+Możliwości dalszego rozwoju narzędzia Comparator SSR PRO:
 
 1. Analiza techniczna i wydajność:
    - Wykrywanie różnic w czasie ładowania (Time to First Byte vs Full DOM Load).
-   - Analiza wagi przesyłanego HTML vs waga wyrenderowanego DOM.
-   - Wykrywanie zasobów blokujących renderowanie, które są dodawane dynamicznie.
+   - Analiza wagi przesyłanego HTML vs waga wyrenderowanego DOM (kilobajty).
+   - Wykrywanie zasobów blokujących renderowanie (render-blocking), które są dodawane dynamicznie przez JS.
+   - Wykresy porównawcze Core Web Vitals (LCP, CLS) dla wersji SSR vs CSR.
 
-2. Rozszerzone SEO:
-   - Porównywanie liczby i treści nagłówków H1-H6 (czy JS nie zmienia struktury nagłówków).
-   - Weryfikacja atrybutów 'alt' obrazów - czy są obecne w kodzie źródłowym.
-   - Sprawdzanie linków wewnętrznych i zewnętrznych pod kątem atrybutów 'rel' (np. nofollow dodawane przez JS).
-   - Walidacja poprawności danych strukturalnych JSON-LD w obu wersjach.
+2. Rozszerzone SEO i Semantyka:
+   - Pełne porównanie treści nagłówków H1-H6 (nie tylko liczba, ale różnice w tekście).
+   - Weryfikacja atrybutów 'rel' w linkach (np. czy JS nie dodaje dynamicznie 'nofollow').
+   - Walidacja poprawności danych strukturalnych JSON-LD (walidator schema.org) zintegrowany w narzędziu.
+   - Sprawdzanie czy linki w menu nawigacyjnym są identyczne w obu wersjach.
 
 3. UX i funkcjonalność:
-   - Eksport wyników porównania do formatu PDF lub CSV.
-   - Historia porównań dla danej domeny.
-   - Możliwość symulacji różnych User-Agentów (np. Googlebot Smartphone).
-   - Podświetlanie konkretnych fragmentów kodu, które się różnią, w widoku "Side-by-Side".
+   - Eksport raportu do PDF/CSV/JSON.
+   - Historia porównań dla danej domeny z możliwością śledzenia zmian w czasie.
+   - Symulacja różnych User-Agentów (Googlebot smartphone, Bingbot, Social Media Crawlers).
+   - Widok "Side-by-Side" dla oczyszczonego tekstu z podświetlaniem różnic (diff highlight).
 
-4. Automatyzacja:
-   - Integracja z Google Search Console API w celu sprawdzania statusu indeksowania.
-   - Powiadomienia o krytycznych różnicach (np. brak tagu 'description' w wersji serwerowej).
-   - Możliwość uruchomienia testu dla całej sitemapy (batch processing).
-
-5. Integracje:
-   - Możliwość wysłania raportu bezpośrednio na Slack/Discord dla zespołu deweloperskiego.
-   - Integracja z popularnymi systemami CMS (np. wtyczka do WordPressa sprawdzająca renderowanie).
+4. Automatyzacja i Integracje:
+   - Integracja z Google Search Console API (status indeksowania).
+   - System alertów o krytycznych rozbieżnościach (np. różnica w Title powyżej 20%).
+   - Batch processing - możliwość uruchomienia testu dla listy URLi z sitemapy.
+   - Wtyczka do Slacka/Discorda wysyłająca raport po każdej publikacji wersji produkcyjnej strony.

@@ -17,74 +17,102 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const translations = {
         en: {
-            subtitle: "Compare DOM (Browser) with HTML (Server)",
-            compareBtn: "Compare Now",
-            copyDevtools: "Copy DevTools",
+            subtitle: "Analyze and compare SSR vs CSR rendering",
+            compareBtn: "Run Analysis",
+            copyDevtools: "Copy DOM",
             copySource: "Copy Source",
-            loading: "Fetching and analyzing data... (may take up to 5s)",
-            comparisonTitle: "Comparison Result (Cleaned SEO Elements)",
+            loading: "Analyzing document structure... (3-5s)",
+            comparisonTitle: "SEO Comparison (Semantic)",
             legendMismatch: "Difference",
             legendMatch: "Match",
-            titleFullCode: "Full Code Comparison",
-            summaryDevtools: "DevTools Code (DOM)",
-            summarySource: "Source Code (Server)",
+            titleFullCode: "Source Code Inspector",
+            summaryDevtools: "Rendered DOM (CSR)",
+            summarySource: "Server HTML (SSR)",
             copied: "Copied!",
-            error: "An error occurred while fetching data. Make sure you are on an active webpage.",
-            headerSource: "Source (Server)",
-            headerDevTools: "DevTools (Browser)",
-            titleChecklist: "SEO Checklist",
-            btnMissing: "Check Missing",
+            error: "Analysis failed. Please refresh the page and try again.",
+            headerSource: "SSR (Server)",
+            headerDevTools: "CSR (Browser)",
+            titleChecklist: "Technical SEO Audit",
+            btnMissing: "Audit Tags",
             techView: "Technical",
             contentView: "Content",
-            element: "Element",
+            element: "Audit Point",
             status: "Status",
-            checkTitle: "Title",
-            checkDesc: "Description",
-            checkCanon: "Canonical",
-            checkJsonLd: "JSON-LD",
-            checkOgTitle: "OG:Title",
-            checkOgDesc: "OG:Description",
-            checkH1: "H1 Tag",
-            checkH2: "H2 Tag",
-            checkRobots: "Robots",
+            checkTitle: "Page Title",
+            checkDesc: "Meta Description",
+            checkCanon: "Canonical URL",
+            checkJsonLd: "JSON-LD Schema",
+            checkOgTitle: "OpenGraph Title",
+            checkOgDesc: "OpenGraph Desc",
+            checkH1: "H1 Header",
+            checkH2: "H2 Header",
+            checkRobots: "Robots Meta",
             checkTwitter: "Twitter Card",
             checkLang: "HTML Lang",
-            checkFavicon: "Favicon"
+            checkFavicon: "Favicon",
+            checkOgImage: "OG:Image",
+            checkTwitterImage: "Twitter:Image",
+            checkViewport: "Viewport",
+            checkCharset: "Charset",
+            checkH3: "H3 Header",
+            checkHreflang: "Hreflang",
+            h1Count: "H1 Tags Count",
+            titleLen: "Title Length",
+            descLen: "Description Length",
+            imgMissingAlt: "Images missing ALT",
+            labelLang: "Language",
+            labelAnalysis: "Analysis",
+            labelView: "View Filter",
+            labelTools: "Tools"
         },
         pl: {
-            subtitle: "Porównaj DOM (Przeglądarka) z HTML (Serwer)",
-            compareBtn: "Porównaj teraz",
-            copyDevtools: "Kopiuj DevTools",
+            subtitle: "Analiza i porównanie renderowania SSR vs CSR",
+            compareBtn: "Uruchom analizę",
+            copyDevtools: "Kopiuj DOM",
             copySource: "Kopiuj Source",
-            loading: "Pobieranie i analizowanie danych... (może to zająć do 5s)",
-            comparisonTitle: "Wynik porównania (Oczyszczone elementy SEO)",
+            loading: "Analizowanie struktury dokumentu... (3-5s)",
+            comparisonTitle: "Porównanie SEO (Semantyka)",
             legendMismatch: "Różnica",
             legendMatch: "Zgodność",
-            titleFullCode: "Pełne porównanie kodu",
-            summaryDevtools: "Kod DevTools (DOM)",
-            summarySource: "Kod Source (Serwer)",
+            titleFullCode: "Inspektor kodu źródłowego",
+            summaryDevtools: "Wyrenderowany DOM (CSR)",
+            summarySource: "Kod HTML serwera (SSR)",
             copied: "Skopiowano!",
-            error: "Wystąpił błąd podczas pobierania danych. Upewnij się, że jesteś na aktywnej stronie internetowej.",
-            headerSource: "Source (Serwer)",
-            headerDevTools: "DevTools (Przeglądarka)",
-            titleChecklist: "Checklista SEO",
-            btnMissing: "Brakujące",
+            error: "Analiza nieudana. Odśwież stronę i spróbuj ponownie.",
+            headerSource: "SSR (Serwer)",
+            headerDevTools: "CSR (Przeglądarka)",
+            titleChecklist: "Audyt techniczny SEO",
+            btnMissing: "Audyt tagów",
             techView: "Techniczne",
             contentView: "Treść",
-            element: "Element",
+            element: "Punkt audytu",
             status: "Status",
-            checkTitle: "Tytuł",
-            checkDesc: "Opis",
-            checkCanon: "Link Kanoniczny",
-            checkJsonLd: "JSON-LD",
-            checkOgTitle: "OG:Tytuł",
-            checkOgDesc: "OG:Opis",
-            checkH1: "Tag H1",
-            checkH2: "Tag H2",
-            checkRobots: "Robots",
+            checkTitle: "Tytuł strony (Title)",
+            checkDesc: "Opis meta (Description)",
+            checkCanon: "Link kanoniczny",
+            checkJsonLd: "Schemat JSON-LD",
+            checkOgTitle: "Tytuł OpenGraph",
+            checkOgDesc: "Opis OpenGraph",
+            checkH1: "Nagłówek H1",
+            checkH2: "Nagłówek H2",
+            checkRobots: "Meta Robots",
             checkTwitter: "Twitter Card",
-            checkLang: "Język HTML",
-            checkFavicon: "Fawikona"
+            checkLang: "Język HTML (Lang)",
+            checkFavicon: "Fawikona",
+            checkOgImage: "OG:Image",
+            checkTwitterImage: "Twitter:Image",
+            checkViewport: "Viewport",
+            checkCharset: "Charset",
+            checkH3: "Nagłówek H3",
+            checkHreflang: "Tagi Hreflang",
+            h1Count: "Liczba tagów H1",
+            titleLen: "Długość tytułu",
+            descLen: "Długość opisu",
+            imgMissingAlt: "Obrazy bez atrybutu ALT",
+            labelLang: "Język",
+            labelAnalysis: "Analiza",
+            labelView: "Filtr widoku",
+            labelTools: "Narzędzia"
         }
     };
 
@@ -110,6 +138,11 @@ document.addEventListener('DOMContentLoaded', function () {
         btnMissing.textContent = translations[lang].btnMissing;
         viewTechBtn.textContent = translations[lang].techView;
         viewContentBtn.textContent = translations[lang].contentView;
+
+        document.getElementById('label-lang').textContent = translations[lang].labelLang;
+        document.getElementById('label-analysis').textContent = translations[lang].labelAnalysis;
+        document.getElementById('label-view').textContent = translations[lang].labelView;
+        document.getElementById('label-tools').textContent = translations[lang].labelTools;
 
         if (missingResult.style.display === 'block') generateChecklist();
     }
@@ -196,16 +229,35 @@ document.addEventListener('DOMContentLoaded', function () {
             { name: t.checkTitle, pattern: /<title/i },
             { name: t.checkDesc, pattern: /<meta[^>]*name="description"/i },
             { name: t.checkCanon, pattern: /<link[^>]*rel="canonical"/i },
+            { name: t.checkHreflang, pattern: /<link[^>]*hreflang=/i },
             { name: t.checkJsonLd, pattern: /<script[^>]*type="application\/ld\+json"/i },
             { name: t.checkOgTitle, pattern: /<meta[^>]*property="og:title"/i },
             { name: t.checkOgDesc, pattern: /<meta[^>]*property="og:description"/i },
+            { name: t.checkOgImage, pattern: /<meta[^>]*property="og:image"/i },
+            { name: t.checkTwitter, pattern: /<meta[^>]*name="twitter:card"/i },
+            { name: t.checkTwitterImage, pattern: /<meta[^>]*name="twitter:image"/i },
             { name: t.checkH1, pattern: /<h1/i },
             { name: t.checkH2, pattern: /<h2/i },
+            { name: t.checkH3, pattern: /<h3/i },
             { name: t.checkRobots, pattern: /<meta[^>]*name="robots"/i },
-            { name: t.checkTwitter, pattern: /<meta[^>]*name="twitter:/i },
             { name: t.checkLang, pattern: /<html[^>]*lang=/i },
-            { name: t.checkFavicon, pattern: /<link[^>]*rel="icon"|<link[^>]*rel="shortcut icon"/i }
+            { name: t.checkFavicon, pattern: /<link[^>]*rel="icon"|<link[^>]*rel="shortcut icon"/i },
+            { name: t.checkViewport, pattern: /<meta[^>]*name="viewport"/i },
+            { name: t.checkCharset, pattern: /<meta[^>]*charset=/i }
         ];
+
+        // Advanced Analysis
+        const h1CountSource = lastResult.source.content.filter(l => l.startsWith('<h1')).length;
+        const h1CountDev = lastResult.devtools.content.filter(l => l.startsWith('<h1')).length;
+
+        const titleLine = devtoolsAll.find(l => l.startsWith('<title'));
+        const titleLen = titleLine ? titleLine.replace(/<[^>]+>/g, '').length : 0;
+
+        const descLine = devtoolsAll.find(l => l.includes('name="description"'));
+        const descLen = descLine ? (descLine.match(/content="([^"]*)"/) || [0, ''])[1].length : 0;
+
+        const missingAltSource = lastResult.source.content.filter(l => l.startsWith('<img') && !l.includes('alt=')).length;
+        const missingAltDev = lastResult.devtools.content.filter(l => l.startsWith('<img') && !l.includes('alt=')).length;
 
         let html = `<table><tr><th>${t.element}</th><th>${t.headerSource}</th><th>${t.headerDevTools}</th></tr>`;
         checks.forEach(check => {
@@ -217,6 +269,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td class="${inDevtools ? 'status-check' : 'status-missing'}">${inDevtools ? '✓' : '✗'}</td>
             </tr>`;
         });
+
+        // Add Analysis Rows
+        html += `<tr class="analysis-row"><td>${t.h1Count}</td><td>${h1CountSource}</td><td>${h1CountDev}</td></tr>`;
+        html += `<tr class="analysis-row"><td>${t.titleLen}</td><td>-</td><td>${titleLen} ch</td></tr>`;
+        html += `<tr class="analysis-row"><td>${t.descLen}</td><td>-</td><td>${descLen} ch</td></tr>`;
+        html += `<tr class="analysis-row"><td>${t.imgMissingAlt}</td><td>${missingAltSource}</td><td>${missingAltDev}</td></tr>`;
+
         html += '</table>';
         document.getElementById('checklistOutput').innerHTML = html;
     }
@@ -256,52 +315,75 @@ function filterResults(type) {
 
 function getPageData() {
     const fullHTML = document.documentElement.outerHTML;
-    const htmlTag = document.documentElement.cloneNode(false).outerHTML;
+
+    function getCleanHtmlTag(el) {
+        const lang = el.getAttribute('lang');
+        return `<html${lang ? ` lang="${lang}"` : ''}>`;
+    }
+    const htmlTag = getCleanHtmlTag(document.documentElement);
 
     function extract() {
         const tech = [];
         const content = [];
         const techTags = ['title', 'meta', 'link', 'script'];
         const contentTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'li', 'td', 'th'];
+        const ignoreTags = ['style', 'noscript', 'svg', 'template', 'iframe'];
 
         function walk(n, insideContentTag = false) {
             if (n.nodeType === Node.TEXT_NODE) {
                 const text = n.textContent.trim();
-                if (text && !insideContentTag) content.push(text);
+                // Basic cleanup to avoid capturing technical artifacts in text nodes
+                if (text && !insideContentTag && !text.includes('@media') && !text.includes('{')) content.push(text);
                 return;
             }
             if (n.nodeType !== Node.ELEMENT_NODE) return;
 
             const tag = n.tagName.toLowerCase();
+            if (ignoreTags.includes(tag)) return;
+
             let isContent = contentTags.includes(tag);
 
             if (techTags.includes(tag)) {
-                const clone = n.cloneNode(true);
-                if (tag === 'link') {
-                    const rel = clone.getAttribute('rel');
-                    if (rel === 'canonical' || rel === 'alternate' || rel === 'icon' || rel === 'shortcut icon') tech.push(clone.outerHTML);
-                } else if (tag === 'script') {
-                    if (clone.getAttribute('type') === 'application/ld+json') tech.push(clone.outerHTML);
-                } else if (tag === 'meta') {
-                    const name = clone.getAttribute('name') || clone.getAttribute('property') || clone.getAttribute('http-equiv');
-                    if (name) tech.push(clone.outerHTML);
-                } else {
-                    tech.push(clone.outerHTML);
-                }
-                return; // Don't walk children of tech tags for content
-            } else if (isContent) {
-                const alt = n.getAttribute('alt');
-                const href = n.getAttribute('href');
-                const src = n.getAttribute('src');
-                const innerText = n.innerText ? n.innerText.trim() : (n.textContent ? n.textContent.trim() : '');
+                const allowedAttrs = {
+                    'meta': ['name', 'property', 'content', 'http-equiv', 'charset'],
+                    'link': ['rel', 'href', 'hreflang', 'as', 'type', 'media'],
+                    'script': ['type', 'src'],
+                    'html': ['lang']
+                };
 
                 let attrs = '';
-                if (alt) attrs += ` alt="${alt}"`;
-                if (href) attrs += ` href="${href}"`;
-                if (src) attrs += ` src="${src}"`;
+                const attrsToCopy = allowedAttrs[tag] || [];
+                attrsToCopy.forEach(attrName => {
+                    const val = n.getAttribute(attrName);
+                    if (val !== null) attrs += ` ${attrName}="${val}"`;
+                });
 
-                let htmlContent = `<${tag}${attrs.trim() ? ' ' + attrs.trim() : ''}>${innerText}</${tag}>`;
-                if (tag === 'img') htmlContent = `<img${attrs.trim() ? ' ' + attrs.trim() : ''}>`;
+                if (tag === 'link') {
+                    const rel = n.getAttribute('rel');
+                    const important = ['canonical', 'alternate', 'icon', 'shortcut icon', 'stylesheet', 'preload', 'dns-prefetch', 'preconnect'];
+                    if (important.includes(rel)) tech.push(`<link${attrs}>`);
+                } else if (tag === 'script') {
+                    if (n.getAttribute('type') === 'application/ld+json') tech.push(`<script${attrs}>${(n.innerText || n.textContent).trim()}</script>`);
+                } else if (tag === 'meta') {
+                    const name = n.getAttribute('name') || n.getAttribute('property') || n.getAttribute('http-equiv') || n.getAttribute('charset');
+                    if (name) tech.push(`<meta${attrs}>`);
+                } else if (tag === 'title') {
+                    tech.push(`<title>${n.textContent.trim()}</title>`);
+                }
+                return;
+            } else if (isContent) {
+                const innerText = (n.innerText || n.textContent || '').trim();
+                if (innerText.includes('{') && (innerText.includes('@media') || innerText.includes('display:'))) return;
+
+                const allowedAttrs = ['href', 'src', 'alt'];
+                let attrs = '';
+                allowedAttrs.forEach(attrName => {
+                    const val = n.getAttribute(attrName);
+                    if (val !== null) attrs += ` ${attrName}="${val}"`;
+                });
+
+                let htmlContent = `<${tag}${attrs}>${innerText}</${tag}>`;
+                if (tag === 'img') htmlContent = `<img${attrs}>`;
                 content.push(htmlContent);
             }
 
@@ -325,51 +407,73 @@ function getPageData() {
 function extractSEODataFromHTML(html) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    const htmlTag = doc.documentElement.cloneNode(false).outerHTML;
+
+    function getCleanHtmlTag(el) {
+        const lang = el.getAttribute('lang');
+        return `<html${lang ? ` lang="${lang}"` : ''}>`;
+    }
+    const htmlTag = getCleanHtmlTag(doc.documentElement);
 
     const tech = [];
     const content = [];
     const techTags = ['title', 'meta', 'link', 'script'];
     const contentTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'img', 'a', 'button', 'li', 'td', 'th'];
+    const ignoreTags = ['style', 'noscript', 'svg', 'template', 'iframe'];
 
     function walk(n, insideContentTag = false) {
         if (n.nodeType === Node.TEXT_NODE) {
             const text = n.textContent.trim();
-            if (text && !insideContentTag) content.push(text);
+            if (text && !insideContentTag && !text.includes('@media') && !text.includes('{')) content.push(text);
             return;
         }
         if (n.nodeType !== Node.ELEMENT_NODE) return;
 
         const tag = n.tagName.toLowerCase();
+        if (ignoreTags.includes(tag)) return;
+
         let isContent = contentTags.includes(tag);
 
         if (techTags.includes(tag)) {
-            const clone = n.cloneNode(true);
+        const allowedAttrs = {
+            'meta': ['name', 'property', 'content', 'http-equiv', 'charset'],
+            'link': ['rel', 'href', 'hreflang', 'as', 'type', 'media'],
+            'script': ['type', 'src'],
+            'html': ['lang']
+        };
+
+        let attrs = '';
+        const attrsToCopy = allowedAttrs[tag] || [];
+        attrsToCopy.forEach(attrName => {
+            const val = n.getAttribute(attrName);
+            if (val !== null) attrs += ` ${attrName}="${val}"`;
+        });
+
             if (tag === 'link') {
-                const rel = clone.getAttribute('rel');
-                if (rel === 'canonical' || rel === 'alternate' || rel === 'icon' || rel === 'shortcut icon') tech.push(clone.outerHTML);
+            const rel = n.getAttribute('rel');
+            const important = ['canonical', 'alternate', 'icon', 'shortcut icon', 'stylesheet', 'preload', 'dns-prefetch', 'preconnect'];
+            if (important.includes(rel)) tech.push(`<link${attrs}>`);
             } else if (tag === 'script') {
-                if (clone.getAttribute('type') === 'application/ld+json') tech.push(clone.outerHTML);
+            if (n.getAttribute('type') === 'application/ld+json') tech.push(`<script${attrs}>${(n.innerText || n.textContent).trim()}</script>`);
             } else if (tag === 'meta') {
-                const name = clone.getAttribute('name') || clone.getAttribute('property') || clone.getAttribute('http-equiv');
-                if (name) tech.push(clone.outerHTML);
-            } else {
-                tech.push(clone.outerHTML);
+            const name = n.getAttribute('name') || n.getAttribute('property') || n.getAttribute('http-equiv') || n.getAttribute('charset');
+            if (name) tech.push(`<meta${attrs}>`);
+        } else if (tag === 'title') {
+            tech.push(`<title>${n.textContent.trim()}</title>`);
             }
-            return; // Don't walk children of tech tags
+        return;
         } else if (isContent) {
-            const alt = n.getAttribute('alt');
-            const href = n.getAttribute('href');
-            const src = n.getAttribute('src');
             const innerText = (n.innerText || n.textContent || '').trim();
+            if (innerText.includes('{') && (innerText.includes('@media') || innerText.includes('display:'))) return;
 
+            const allowedAttrs = ['href', 'src', 'alt'];
             let attrs = '';
-            if (alt) attrs += ` alt="${alt}"`;
-            if (href) attrs += ` href="${href}"`;
-            if (src) attrs += ` src="${src}"`;
+            allowedAttrs.forEach(attrName => {
+                const val = n.getAttribute(attrName);
+                if (val !== null) attrs += ` ${attrName}="${val}"`;
+            });
 
-            let htmlContent = `<${tag}${attrs.trim() ? ' ' + attrs.trim() : ''}>${innerText}</${tag}>`;
-            if (tag === 'img') htmlContent = `<img${attrs.trim() ? ' ' + attrs.trim() : ''}>`;
+            let htmlContent = `<${tag}${attrs}>${innerText}</${tag}>`;
+            if (tag === 'img') htmlContent = `<img${attrs}>`;
             content.push(htmlContent);
         }
 
