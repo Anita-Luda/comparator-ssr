@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function redisplayComparison() {
         const sourceSEO = currentView === 'tech' ? lastResult.source.tech : lastResult.source.content;
         const devtoolsSEO = currentView === 'tech' ? lastResult.devtools.tech : lastResult.devtools.content;
-        compareSEOElements(devtoolsSEO, sourceSEO);
+        compareSEOElements(sourceSEO, devtoolsSEO);
     }
 
     function generateChecklist() {
@@ -517,26 +517,31 @@ function extractSEODataFromHTML(html) {
 }
 
 function compareSEOElements(code1, code2) {
+    // Normalizing content: lowercase for comparison, keeping original for display if matched
     const lines1 = code1.map(l => l.trim()).filter(l => l);
     const lines2 = code2.map(l => l.trim()).filter(l => l);
 
-    const set1 = new Set(lines1);
-    const set2 = new Set(lines2);
+    // Case-insensitive comparison map
+    const map1 = new Map(lines1.map(l => [l.toLowerCase(), l]));
+    const map2 = new Map(lines2.map(l => [l.toLowerCase(), l]));
 
-    const allLines = Array.from(new Set([...lines1, ...lines2]));
+    // All unique keys (lowercase)
+    const allKeys = Array.from(new Set([...map1.keys(), ...map2.keys()]));
+
     let resultHTML = '<table style="width:100%">';
 
-    allLines.forEach(line => {
-        const isIn1 = set1.has(line);
-        const isIn2 = set2.has(line);
+    allKeys.forEach(key => {
+        const val1 = map1.get(key);
+        const val2 = map2.get(key);
 
         resultHTML += '<tr>';
-        if (isIn1 && isIn2) {
-            resultHTML += `<td class="match-cell">${escapeHTML(line)}</td>`;
-            resultHTML += `<td class="match-cell">${escapeHTML(line)}</td>`;
+        if (val1 && val2) {
+            // Case-insensitive match
+            resultHTML += `<td class="match-cell">${escapeHTML(val1)}</td>`;
+            resultHTML += `<td class="match-cell">${escapeHTML(val2)}</td>`;
         } else {
-            resultHTML += `<td class="${isIn1 ? 'mismatch-cell' : ''}">${isIn1 ? escapeHTML(line) : ''}</td>`;
-            resultHTML += `<td class="${isIn2 ? 'mismatch-cell' : ''}">${isIn2 ? escapeHTML(line) : ''}</td>`;
+            resultHTML += `<td class="${val1 ? 'mismatch-cell' : ''}">${val1 ? escapeHTML(val1) : ''}</td>`;
+            resultHTML += `<td class="${val2 ? 'mismatch-cell' : ''}">${val2 ? escapeHTML(val2) : ''}</td>`;
         }
         resultHTML += '</tr>';
     });
