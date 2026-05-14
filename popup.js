@@ -63,7 +63,9 @@ document.addEventListener('DOMContentLoaded', function () {
             labelLang: "Language",
             labelAnalysis: "Analysis",
             labelView: "View Filter",
-            labelTools: "Tools"
+            labelTools: "Tools",
+            on: "ON",
+            off: "OFF"
         },
         pl: {
             subtitle: "Analiza i porównanie renderowania SSR vs CSR",
@@ -112,7 +114,9 @@ document.addEventListener('DOMContentLoaded', function () {
             labelLang: "Język",
             labelAnalysis: "Analiza",
             labelView: "Filtr widoku",
-            labelTools: "Narzędzia"
+            labelTools: "Narzędzia",
+            on: "WŁ",
+            off: "WYŁ"
         }
     };
 
@@ -135,7 +139,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('header-source').textContent = translations[lang].headerSource;
         document.getElementById('header-devtools').textContent = translations[lang].headerDevTools;
         document.getElementById('title-checklist').textContent = translations[lang].titleChecklist;
-        btnMissing.textContent = translations[lang].btnMissing;
+        document.getElementById('audit-on').textContent = translations[lang].on;
+        document.getElementById('audit-off').textContent = translations[lang].off;
         viewTechBtn.textContent = translations[lang].techView;
         viewContentBtn.textContent = translations[lang].contentView;
 
@@ -164,11 +169,25 @@ document.addEventListener('DOMContentLoaded', function () {
         if (lastResult) redisplayComparison();
     });
 
-    btnMissing.addEventListener('click', () => {
+    function toggleAudit(state) {
         if (!lastResult) return;
-        missingResult.style.display = missingResult.style.display === 'none' ? 'block' : 'none';
-        if (missingResult.style.display === 'block') generateChecklist();
-    });
+        const btnOn = document.getElementById('audit-on');
+        const btnOff = document.getElementById('audit-off');
+
+        if (state === 'on') {
+            btnOn.classList.add('active');
+            btnOff.classList.remove('active');
+            missingResult.style.display = 'block';
+            generateChecklist();
+        } else {
+            btnOff.classList.add('active');
+            btnOn.classList.remove('active');
+            missingResult.style.display = 'none';
+        }
+    }
+
+    document.getElementById('audit-on').addEventListener('click', () => toggleAudit('on'));
+    document.getElementById('audit-off').addEventListener('click', () => toggleAudit('off'));
 
     extractBtn.addEventListener('click', async () => {
         resultDiv.style.display = 'none';
@@ -217,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function redisplayComparison() {
         const sourceSEO = currentView === 'tech' ? lastResult.source.tech : lastResult.source.content;
         const devtoolsSEO = currentView === 'tech' ? lastResult.devtools.tech : lastResult.devtools.content;
-        compareSEOElements(devtoolsSEO, sourceSEO);
+        compareSEOElements(sourceSEO, devtoolsSEO);
     }
 
     function generateChecklist() {
@@ -363,7 +382,13 @@ function getPageData() {
                     const important = ['canonical', 'alternate', 'icon', 'shortcut icon'];
                     if (important.includes(rel)) tech.push(`<link${attrs}>`);
                 } else if (tag === 'script') {
-                    if (n.getAttribute('type') === 'application/ld+json') tech.push(`<script${attrs}>${(n.innerText || n.textContent).trim()}</script>`);
+                    if (n.getAttribute('type') === 'application/ld+json') {
+                        let jsonText = (n.innerText || n.textContent).trim();
+                        try {
+                            jsonText = JSON.stringify(JSON.parse(jsonText), null, 2);
+                        } catch (e) {}
+                        tech.push(`<script${attrs}>\n${jsonText}\n</script>`);
+                    }
                 } else if (tag === 'meta') {
                     const name = n.getAttribute('name') || n.getAttribute('property') || n.getAttribute('http-equiv') || n.getAttribute('charset');
                     if (name) tech.push(`<meta${attrs}>`);
@@ -453,7 +478,13 @@ function extractSEODataFromHTML(html) {
             const important = ['canonical', 'alternate', 'icon', 'shortcut icon'];
             if (important.includes(rel)) tech.push(`<link${attrs}>`);
             } else if (tag === 'script') {
-            if (n.getAttribute('type') === 'application/ld+json') tech.push(`<script${attrs}>${(n.innerText || n.textContent).trim()}</script>`);
+            if (n.getAttribute('type') === 'application/ld+json') {
+                let jsonText = (n.innerText || n.textContent).trim();
+                try {
+                    jsonText = JSON.stringify(JSON.parse(jsonText), null, 2);
+                } catch (e) {}
+                tech.push(`<script${attrs}>\n${jsonText}\n</script>`);
+            }
             } else if (tag === 'meta') {
             const name = n.getAttribute('name') || n.getAttribute('property') || n.getAttribute('http-equiv') || n.getAttribute('charset');
             if (name) tech.push(`<meta${attrs}>`);
@@ -486,26 +517,31 @@ function extractSEODataFromHTML(html) {
 }
 
 function compareSEOElements(code1, code2) {
+    // Normalizing content: lowercase for comparison, keeping original for display if matched
     const lines1 = code1.map(l => l.trim()).filter(l => l);
     const lines2 = code2.map(l => l.trim()).filter(l => l);
 
-    const set1 = new Set(lines1);
-    const set2 = new Set(lines2);
+    // Case-insensitive comparison map
+    const map1 = new Map(lines1.map(l => [l.toLowerCase(), l]));
+    const map2 = new Map(lines2.map(l => [l.toLowerCase(), l]));
 
-    const allLines = Array.from(new Set([...lines1, ...lines2]));
+    // All unique keys (lowercase)
+    const allKeys = Array.from(new Set([...map1.keys(), ...map2.keys()]));
+
     let resultHTML = '<table style="width:100%">';
 
-    allLines.forEach(line => {
-        const isIn1 = set1.has(line);
-        const isIn2 = set2.has(line);
+    allKeys.forEach(key => {
+        const val1 = map1.get(key);
+        const val2 = map2.get(key);
 
         resultHTML += '<tr>';
-        if (isIn1 && isIn2) {
-            resultHTML += `<td class="match-cell">${escapeHTML(line)}</td>`;
-            resultHTML += `<td class="match-cell">${escapeHTML(line)}</td>`;
+        if (val1 && val2) {
+            // Case-insensitive match
+            resultHTML += `<td class="match-cell">${escapeHTML(val1)}</td>`;
+            resultHTML += `<td class="match-cell">${escapeHTML(val2)}</td>`;
         } else {
-            resultHTML += `<td class="${isIn1 ? 'mismatch-cell' : ''}">${isIn1 ? escapeHTML(line) : ''}</td>`;
-            resultHTML += `<td class="${isIn2 ? 'mismatch-cell' : ''}">${isIn2 ? escapeHTML(line) : ''}</td>`;
+            resultHTML += `<td class="${val1 ? 'mismatch-cell' : ''}">${val1 ? escapeHTML(val1) : ''}</td>`;
+            resultHTML += `<td class="${val2 ? 'mismatch-cell' : ''}">${val2 ? escapeHTML(val2) : ''}</td>`;
         }
         resultHTML += '</tr>';
     });
